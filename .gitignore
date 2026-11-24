@@ -10,17 +10,17 @@ contracts/broadcast/
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+keystore/
+credentials.json
 
-# Node
+# Dependencies & build junk
 node_modules/
 dist/
-*.local
 
 # Editor/OS
 .DS_Store
 .idea/
 .vscode/
-
-# App build
-app/dist/
-app/tsconfig.tsbuildinfo
+*.local
