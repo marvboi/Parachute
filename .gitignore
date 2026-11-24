@@ -23,4 +23,4 @@ dist/
 .DS_Store
 .idea/
 .vscode/
-*.local
+*.local*.tsbuildinfo
