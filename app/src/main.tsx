@@ -9,6 +9,7 @@ import App from "./App";
 import "./index.css";
 import "./fall.css";
 import "./paper.css";
+import "./flow.css";
 
 const queryClient = new QueryClient();
 const wagmiConfig = createConfig({

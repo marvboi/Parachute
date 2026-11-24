@@ -9,6 +9,7 @@ import { CrossChainTimeline } from "./components/CrossChainTimeline";
 import { StatsStrip } from "./components/StatsStrip";
 import { PackingDeck } from "./components/PackingDeck";
 import { NarrativeBridge } from "./components/NarrativeBridge";
+import { DeckStepNav } from "./components/DeckStepNav";
 import { DEFAULT_CHART, buildLiveTimeline, type Position, type TokenSymbol } from "./data/positions";
 import { hasDeployments } from "./config/contracts";
 import { useChainlinkPrices } from "./hooks/useChainlinkPrice";
@@ -103,33 +104,59 @@ export default function App() {
           <header className="pack-header">
             <h2 className="pack-title proposed-copy">Pack your parachute</h2>
           </header>
+          <DeckStepNav />
           {positions.length > 0 && <StatsStrip positions={positions} />}
-          <div className="app-deck-grid">
-            {vaultStatus !== "empty" && vaultStatus !== "error" && (
-              <LivePriceChart
-                token={selected.token as TokenSymbol}
-                basePrice={spot}
-                trailPct={selected.stopType === "trailing" ? selected.trailPct : 5}
-                animated
+          <div className="app-deck-grid flow-layout">
+            <div className="flow-step-shell">
+              <p className="flow-step-badge">
+                <span className="tabular">1</span> Vault
+              </p>
+              <PositionCards
+                positions={positions}
+                selectedId={selectedId ?? ""}
+                onSelect={setSelectedId}
+                status={vaultStatus}
+                onRetry={() => vaultQuery.refetch()}
               />
+            </div>
+
+            {vaultStatus !== "empty" && vaultStatus !== "error" && (
+              <div className="flow-step-shell">
+                <p className="flow-step-badge">
+                  <span className="tabular">2</span> Chart
+                </p>
+                <LivePriceChart
+                  token={selected.token as TokenSymbol}
+                  basePrice={spot}
+                  trailPct={selected.stopType === "trailing" ? selected.trailPct : 5}
+                  animated
+                />
+              </div>
             )}
-            <PositionCards
-              positions={positions}
-              selectedId={selectedId ?? ""}
-              onSelect={setSelectedId}
-              status={vaultStatus}
-              onRetry={() => vaultQuery.refetch()}
-            />
-            <CreateStopFlow
-              onLandingMode={setSwapGround}
-              armedCount={positions.filter((p) => p.status === "armed").length}
-              onChainReady={deployed}
-              isVaultOwner={!!isVaultOwner}
-              connectedAddress={address}
-              spotPrice={spot}
-              onVaultRefresh={() => vaultQuery.refetch()}
-            />
-            {vaultStatus === "ready" && selected && <CrossChainTimeline steps={timeline} />}
+
+            <div className="flow-step-shell">
+              <p className="flow-step-badge">
+                <span className="tabular">3</span> Arm stop
+              </p>
+              <CreateStopFlow
+                onLandingMode={setSwapGround}
+                armedCount={positions.filter((p) => p.status === "armed").length}
+                onChainReady={deployed}
+                isVaultOwner={!!isVaultOwner}
+                connectedAddress={address}
+                spotPrice={spot}
+                onVaultRefresh={() => vaultQuery.refetch()}
+              />
+            </div>
+
+            {vaultStatus === "ready" && selected && (
+              <div className="flow-step-shell">
+                <p className="flow-step-badge">
+                  <span className="tabular">4</span> Path
+                </p>
+                <CrossChainTimeline steps={timeline} />
+              </div>
+            )}
           </div>
         </div>
       </PackingDeck>

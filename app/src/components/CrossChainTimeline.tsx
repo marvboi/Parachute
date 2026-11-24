@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { EXPLORERS } from "../config/contracts";
 import type { TimelineStep } from "../data/positions";
 import { useMotionSafe } from "../lib/motion";
+import { Expandable } from "./Expandable";
 
 type Props = { steps: TimelineStep[]; compact?: boolean };
 
@@ -10,12 +11,16 @@ export function CrossChainTimeline({ steps, compact }: Props) {
 
   return (
     <section id="timeline" className={`panel panel-app timeline-panel ${compact ? "timeline-compact" : ""}`}>
-      <header className="panel-head">
-        <div>
-          <h2>Cross-chain timeline</h2>
-          <p className="muted">Base Sepolia event → Lasna reactive → Base Sepolia callback</p>
-        </div>
-      </header>
+      {!compact && (
+        <header className="panel-head panel-head-compact">
+          <div>
+            <h2>Cross-chain timeline</h2>
+            <Expandable summary="What happens across chains" size="sm">
+              <p className="muted">Base Sepolia event → Lasna reactive → Base Sepolia callback</p>
+            </Expandable>
+          </div>
+        </header>
+      )}
       <ol className="timeline timeline-premium">
         {steps.map((step, idx) => (
           <motion.li
@@ -45,27 +50,29 @@ export function CrossChainTimeline({ steps, compact }: Props) {
             </div>
             <div className="step-body glass-inset">
               <StepTitle step={step} />
-              <p className="detail">{step.detail}</p>
-              {step.txHash && (
-                <a
-                  className="tx-link tabular"
-                  href={`${EXPLORERS[step.explorer]}/tx/${step.txHash}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {step.txHash.slice(0, 10)}…{step.txHash.slice(-8)}
-                </a>
-              )}
-              {!step.txHash && step.contractAddress && (
-                <a
-                  className="tx-link tabular"
-                  href={`${EXPLORERS[step.explorer]}/address/${step.contractAddress}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {step.contractAddress.slice(0, 10)}…{step.contractAddress.slice(-8)}
-                </a>
-              )}
+              <Expandable summary="Step detail" size="sm" className="timeline-step-expand">
+                <p className="detail">{step.detail}</p>
+                {step.txHash && (
+                  <a
+                    className="tx-link tabular"
+                    href={`${EXPLORERS[step.explorer]}/tx/${step.txHash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {step.txHash.slice(0, 10)}…{step.txHash.slice(-8)}
+                  </a>
+                )}
+                {!step.txHash && step.contractAddress && (
+                  <a
+                    className="tx-link tabular"
+                    href={`${EXPLORERS[step.explorer]}/address/${step.contractAddress}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {step.contractAddress.slice(0, 10)}…{step.contractAddress.slice(-8)}
+                  </a>
+                )}
+              </Expandable>
             </div>
           </motion.li>
         ))}

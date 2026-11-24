@@ -1,3 +1,5 @@
+import { Expandable } from "../components/Expandable";
+
 type Props = { progress: number };
 
 function MiniEye({ active }: { active: boolean }) {
@@ -53,7 +55,9 @@ export function HowItWorksRail({ progress }: Props) {
           <article key={c.title} className="how-card panel-app" style={{ animationDelay: `${i * 80}ms` }}>
             <c.Icon active={active} />
             <h3>{c.title}</h3>
-            <p>{c.sub}</p>
+            <Expandable summary="More" size="sm">
+              <p>{c.sub}</p>
+            </Expandable>
           </article>
         );
       })}

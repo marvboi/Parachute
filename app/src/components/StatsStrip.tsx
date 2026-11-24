@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useMotionSafe } from "../lib/motion";
 import type { Position } from "../data/positions";
+import { Expandable } from "./Expandable";
 
 type Props = {
   positions: Position[];
@@ -11,7 +12,7 @@ export function StatsStrip({ positions }: Props) {
   const armed = positions.filter((p) => p.status === "armed").length;
   const notional = positions.reduce((sum, p) => {
     const px = p.liveSpot ?? 0;
-    return sum + p.amount * (p.token === "ETH" ? px : p.token === "BTC" ? px : px);
+    return sum + p.amount * px;
   }, 0);
 
   const items = [
@@ -37,10 +38,18 @@ export function StatsStrip({ positions }: Props) {
           >
             <span className="stat-card-label">{item.label}</span>
             <span className="stat-card-value tabular">{item.value}</span>
-            <span className="stat-card-hint">{item.hint}</span>
           </motion.div>
         ))}
       </div>
+      <Expandable summary="Metric definitions" size="sm" className="stats-strip-hint-wrap">
+        <ul className="stats-hint-list muted">
+          {items.map((item) => (
+            <li key={item.label}>
+              <strong>{item.label}:</strong> {item.hint}
+            </li>
+          ))}
+        </ul>
+      </Expandable>
     </section>
   );
 }

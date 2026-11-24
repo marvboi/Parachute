@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { TokenSymbol } from "../data/positions";
 import { buildPriceSeries } from "../data/positions";
 import { useMotionSafe } from "../lib/motion";
+import { Expandable } from "./Expandable";
 
 type Props = {
   token: TokenSymbol;
@@ -95,32 +96,38 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
   })();
 
   return (
-    <section className="panel panel-app chart-panel chart-hero" aria-label="Live trailing stop chart">
-      <header className="panel-head chart-head">
+    <section
+      id="chart"
+      className="panel panel-app chart-panel chart-hero"
+      aria-label="Live trailing stop chart"
+    >
+      <header className="panel-head chart-head panel-head-compact">
         <div>
           <h2>Live chart</h2>
-          <p className="muted">
-            {token}/USD · {trailPct}% trail
-          </p>
-        </div>
-        <div className="chart-legend">
-          <span>
-            <i className="swatch price" /> Price
-          </span>
-          <span>
-            <i className="swatch stop" /> Stop line
-          </span>
-        </div>
-        <div className="chart-prices tabular">
-          <motion.span
-            key={latest.toFixed(2)}
-            initial={reduce ? false : { opacity: 0.6, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          >
-            ${latest.toFixed(2)}
-          </motion.span>
-          <span className="stop">${stopNow.toFixed(2)}</span>
+          <div className="chart-prices tabular">
+            <motion.span
+              key={latest.toFixed(2)}
+              initial={reduce ? false : { opacity: 0.6, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              ${latest.toFixed(2)}
+            </motion.span>
+            <span className="stop">${stopNow.toFixed(2)}</span>
+          </div>
+          <Expandable summary="Chart details" size="sm" className="chart-legend-expand">
+            <p className="muted">
+              {token}/USD · {trailPct}% trail
+            </p>
+            <div className="chart-legend">
+              <span>
+                <i className="swatch price" /> Price
+              </span>
+              <span>
+                <i className="swatch stop" /> Stop line
+              </span>
+            </div>
+          </Expandable>
         </div>
       </header>
       <div className={`chart-stage chart-stage-fill ${showTriggerPulse ? "flash" : ""}`}>
@@ -175,9 +182,11 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
           )}
           <line x1={chart.dotX} x2={chart.dotX} y1={chart.dotY} y2={chart.stopY} className="chart-vert-guide" />
         </svg>
-        <p className="chart-caption">
-          Trailing stop ratchets with new highs; trigger fires when price closes through the line.
-        </p>
+        <Expandable summary="How to read this chart" size="sm">
+          <p className="chart-caption">
+            Trailing stop ratchets with new highs; trigger fires when price closes through the line.
+          </p>
+        </Expandable>
       </div>
     </section>
   );

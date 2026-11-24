@@ -27,3 +27,16 @@ export function hasDeployments(): boolean {
 export function explorerAddress(explorer: keyof typeof EXPLORERS, address: string): string {
   return `${EXPLORERS[explorer]}/address/${address}`;
 }
+
+export const contractVerification = {
+  vault: {
+    address: contracts.vault,
+    verifiedUrl: `${EXPLORERS.baseSepolia}/address/${contracts.vault}#code`,
+    verifiedLabel: "Etherscan (Base Sepolia)",
+  },
+  reactive: {
+    address: contracts.reactive,
+    verifiedUrl: `https://repo.sourcify.dev/contracts/full_match/${CHAIN_LASNA}/${contracts.reactive.toLowerCase()}/`,
+    verifiedLabel: "Sourcify",
+  },
+} as const;

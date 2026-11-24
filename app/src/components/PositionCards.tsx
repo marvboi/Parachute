@@ -2,11 +2,12 @@ import { motion } from "framer-motion";
 import type { Position } from "../data/positions";
 import { DEFAULT_CHART, buildLiveTimeline } from "../data/positions";
 import { buildPositionMiniViz } from "../lib/positionViz";
-import { contracts, explorerAddress } from "../config/contracts";
 import { useMotionSafe } from "../lib/motion";
 import { CrossChainTimeline } from "./CrossChainTimeline";
 import { TokenIcon } from "./TokenIcon";
 import { Capsule } from "../fall/svg/Capsule";
+import { Expandable } from "./Expandable";
+import { VerifiedContractLinks } from "./VerifiedContractLinks";
 
 export type VaultPositionsStatus = "loading" | "ready" | "empty" | "error";
 
@@ -34,28 +35,20 @@ const intensity = (d: number) => `rgba(255, 91, 31, ${0.25 + (d / 100) * 0.65})`
 export function PositionCards({ positions, onSelect, selectedId, status, onRetry }: Props) {
   return (
     <section id="positions" className="panel panel-app positions-panel">
-      <header className="panel-head">
+      <header className="panel-head panel-head-compact">
         <div>
           <h2>Protected positions</h2>
-          <p className="muted">Multi-token vault · fixed or trailing stops</p>
-          {status === "ready" && (
-            <p className="onchain-links muted">
-              <a href={explorerAddress("baseSepolia", contracts.vault)} target="_blank" rel="noreferrer">
-                Vault
-              </a>
-              {" · "}
-              <a href={explorerAddress("lasna", contracts.reactive)} target="_blank" rel="noreferrer">
-                Reactive
-              </a>
-            </p>
-          )}
+          <Expandable summary="About the vault" size="sm">
+            <p className="muted">Multi-token vault · fixed or trailing stops</p>
+            {status === "ready" && <VerifiedContractLinks />}
+          </Expandable>
         </div>
       </header>
       {status === "loading" && (
-        <SearchState title="Loading vault positions…" detail="Reading SifiVault on Base Sepolia" />
+        <VaultState title="Loading vault positions…" detail="Reading SifiVault on Base Sepolia" />
       )}
       {status === "error" && (
-        <SearchState
+        <VaultState
           title="Couldn't load positions"
           detail="RPC or contract call failed. Check network and try again."
           action={
@@ -68,7 +61,7 @@ export function PositionCards({ positions, onSelect, selectedId, status, onRetry
         />
       )}
       {status === "empty" && (
-        <SearchState
+        <VaultState
           title="No positions yet"
           detail="The vault has no active stops. Connect as the vault owner and arm a stop below."
         />
@@ -90,7 +83,7 @@ export function PositionCards({ positions, onSelect, selectedId, status, onRetry
   );
 }
 
-function SearchState({
+function VaultState({
   title,
   detail,
   action,
@@ -102,7 +95,9 @@ function SearchState({
   return (
     <div className="vault-empty-state" role="status">
       <h3 className="vault-empty-title">{title}</h3>
-      <p className="muted vault-empty-detail">{detail}</p>
+      <Expandable summary="Details" size="sm" defaultOpen={false}>
+        <p className="muted vault-empty-detail">{detail}</p>
+      </Expandable>
       {action}
     </div>
   );
@@ -126,24 +121,8 @@ function CapsulePositionCard({
   const showTimeline = position.status === "triggered" || position.status === "armed";
   const armed = position.status === "armed";
 
-  return (
-    <motion.article
-      className={`capsule-position ${active ? "active" : ""} state-${position.status} ${armed ? "is-armed" : ""}`}
-      role="button"
-      tabIndex={0}
-      onClick={onSelect}
-      onKeyDown={(e) => e.key === "Enter" && onSelect()}
-      initial={reduce ? false : { opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0, scale: active ? 1.01 : 1 }}
-      whileTap={reduce ? {} : { scale: 0.992 }}
-      transition={{ ...tween, delay: index * stagger }}
-      layout={!reduce}
-    >
-      {armed && <span className="armed-aura" aria-hidden />}
-      <div className="capsule-pos-head">
-        <TokenIcon symbol={position.token} size={22} />
-        <StatusChip status={position.status} />
-      </div>
+  const details = (
+    <>
       <div className="capsule-pos-svg">
         <svg viewBox={`0 0 ${viz.w} ${viz.h}`} className="capsule-line-svg">
           <defs>
@@ -172,9 +151,6 @@ function CapsulePositionCard({
           )}
         </svg>
       </div>
-      <p className="tabular pos-amount">
-        {position.amount} {position.token}
-      </p>
       <dl className="capsule-metrics tabular stats-row-3">
         <div className="stat-cell">
           <dt>Price</dt>
@@ -191,7 +167,13 @@ function CapsulePositionCard({
       </dl>
       <div className="trigger-distance">
         <span>Trigger distance</span>
-        <div className="trigger-track" role="progressbar" aria-valuenow={Math.round(dist)} aria-valuemin={0} aria-valuemax={100}>
+        <div
+          className="trigger-track"
+          role="progressbar"
+          aria-valuenow={Math.round(dist)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <motion.div
             className="trigger-fill"
             initial={false}
@@ -209,6 +191,43 @@ function CapsulePositionCard({
         <div className="pos-trigger-timeline">
           <CrossChainTimeline steps={buildLiveTimeline(position.token, position.vaultId)} compact />
         </div>
+      )}
+    </>
+  );
+
+  return (
+    <motion.article
+      className={`capsule-position ${active ? "active" : "capsule-position-compact"} state-${position.status} ${armed ? "is-armed" : ""}`}
+      role="button"
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={(e) => e.key === "Enter" && onSelect()}
+      initial={reduce ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0, scale: active ? 1.01 : 1 }}
+      whileTap={reduce ? {} : { scale: 0.992 }}
+      transition={{ ...tween, delay: index * stagger }}
+      layout={!reduce}
+    >
+      {armed && <span className="armed-aura" aria-hidden />}
+      <div className="capsule-pos-head">
+        <TokenIcon symbol={position.token} size={22} />
+        <StatusChip status={position.status} />
+      </div>
+      <p className="tabular pos-amount">
+        {position.amount} {position.token}
+      </p>
+      {active ? (
+        details
+      ) : (
+        <motion.div
+          className="capsule-pos-expandable"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <Expandable summary={`Metrics · stop $${position.stopLevel.toLocaleString()}`} size="sm">
+            {details}
+          </Expandable>
+        </motion.div>
       )}
     </motion.article>
   );

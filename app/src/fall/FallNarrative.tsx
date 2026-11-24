@@ -13,6 +13,7 @@ import {
   tetherLengthPx,
 } from "./fallPaths";
 import { HowItWorksRail } from "./HowItWorksRail";
+import { Expandable } from "../components/Expandable";
 import { Capsule } from "./svg/Capsule";
 import { SpringCanopy } from "./SpringCanopy";
 import { motion } from "framer-motion";
@@ -293,10 +294,12 @@ function PhaseCopy({
             <br />
             <span className="fall-accent">that actually lands</span>
           </h1>
-          <p className="fall-lede">
-            Parachute watches real Chainlink <code>AnswerUpdated</code> events on Base Sepolia, reacts on Lasna, and
-            callbacks your vault before the dip becomes a crash.
-          </p>
+          <Expandable summary="How Parachute works" className="fall-lede-expand">
+            <p className="fall-lede">
+              Parachute watches real Chainlink <code>AnswerUpdated</code> events on Base Sepolia, reacts on Lasna, and
+              callbacks your vault before the dip becomes a crash.
+            </p>
+          </Expandable>
           <p className="fall-live tabular">
             ETH/USD ${price.toFixed(2)} <span className="fall-alt-mode-inline">· live</span>
           </p>
