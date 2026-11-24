@@ -9,8 +9,8 @@ Automated on-chain stop-loss protection for the Reactive Omni buildathon (**Set 
 
 | Path | Purpose |
 | ---- | ------- |
-| `src/` | Foundry contracts (`ParachuteReactive`, `ParachuteVault`) |
-| `src/sifi/` | WIP batch planner (SiFi track experiments) |
+| `contracts/` | Foundry SiFi stack (`SifiReactive`, `SifiVault`, tests, deploy scripts) |
+| `archive/` | Archived pre-SiFi stubs |
 | `app/` | Vite + React frontend |
 | `docs/price-source-proof.md` | On-chain Chainlink feed proof |
 
@@ -18,11 +18,12 @@ Automated on-chain stop-loss protection for the Reactive Omni buildathon (**Set 
 
 ```bash
 export PATH="$PATH:$HOME/.foundry/bin"
+cd contracts
 forge build
 forge test
 ```
 
-SiFi tests are intentionally skipped (`test/sifi`).
+See `contracts/DEPLOY.md` for owner-operated deploy steps (no broadcasting from CI).
 
 ## Frontend
 

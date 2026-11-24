@@ -2,6 +2,9 @@
 cache/
 out/
 broadcast/
+contracts/cache/
+contracts/out/
+contracts/broadcast/
 
 # Env and secrets
 .env
