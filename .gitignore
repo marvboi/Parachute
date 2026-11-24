@@ -1,0 +1,23 @@
+# Foundry
+cache/
+out/
+broadcast/
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+*.local
+
+# Editor/OS
+.DS_Store
+.idea/
+.vscode/
+
+# App build
+app/dist/
+app/tsconfig.tsbuildinfo
