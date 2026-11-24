@@ -63,7 +63,7 @@ export default function App() {
   return (
     <div className="parachute-page">
       <Header demoMode={demoMode} onToggleDemo={() => setDemoMode((d) => !d)} minimal />
-      <FallNarrative ethSpot={ethSpot} onReachApp={onReachApp} />
+      <FallNarrative ethSpot={ethSpot} demoMode={demoMode} onReachApp={onReachApp} />
       <PackingDeck swapGround={swapGround}>
         <div className="page-container">
           <header className="pack-header">

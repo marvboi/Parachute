@@ -11,13 +11,13 @@ export function ParachuteLogo({ className = "", showWordmark = true, size = 40 }
         <path d="M4 12 L10 18 L19 16 L28 20 L34 12 Z" fill="#FF5B1F" opacity="0.55" />
         <path
           d="M6 12.5 H32"
-          stroke="#0A0E1A"
+          stroke="#14161C"
           strokeWidth="0.4"
           opacity="0.3"
         />
         <path
           d="M5 12.2 H12 V14 L14 13.2 L17 14.8 L20 13 L23 15.2 L26 13.5 L29 14.6 L33 12.2"
-          stroke="#0A0E1A"
+          stroke="#14161C"
           strokeWidth="1.1"
           fill="none"
           strokeLinejoin="round"

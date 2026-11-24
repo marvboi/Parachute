@@ -116,21 +116,13 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
         <svg viewBox={`0 0 ${chart.w} ${chart.h}`} preserveAspectRatio="none" className="chart-svg chart-svg-tall">
           <defs>
             <linearGradient id={`${gid}-fill`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FF5B1F" stopOpacity="0.55" />
-              <stop offset="55%" stopColor="#FF5B1F" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#FF5B1F" stopOpacity="0" />
+              <stop offset="0%" stopColor="#14161C" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#14161C" stopOpacity="0" />
             </linearGradient>
             <linearGradient id={`${gid}-line`} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#ff8f4a" />
-              <stop offset="100%" stopColor="#FF5B1F" />
+              <stop offset="0%" stopColor="#14161C" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#14161C" />
             </linearGradient>
-            <filter id={`${gid}-dot`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="1.2" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
           {[0.2, 0.4, 0.6, 0.8].map((p) => (
             <line key={p} x1="0" x2={chart.w} y1={chart.h * p} y2={chart.h * p} className="chart-grid-line" />
@@ -151,7 +143,7 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
             className="price-line price-line-gradient"
             style={{ stroke: `url(#${gid}-line)` }}
           />
-          <circle cx={chart.dotX} cy={chart.dotY} r="2.8" className="price-dot-glow" filter={`url(#${gid}-dot)`} />
+          <circle cx={chart.dotX} cy={chart.dotY} r="2.8" className="price-dot-glow" />
           <circle cx={chart.dotX} cy={chart.dotY} r="1.1" className="price-dot-core" />
           {showTriggerPulse && (
             <motion.circle

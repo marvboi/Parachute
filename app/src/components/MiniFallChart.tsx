@@ -27,10 +27,10 @@ export function MiniFallChart({ token, trailPct, height = 120 }: Props) {
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="mini-fall-chart" aria-hidden>
-      <path d={`${pricePath} L${w},${h} L0,${h} Z`} fill="rgba(255,91,31,0.12)" />
-      <path d={pricePath} fill="none" stroke="#FF5B1F" strokeWidth="1.5" />
+      <path d={`${pricePath} L${w},${h} L0,${h} Z`} fill="rgba(20,22,28,0.06)" />
+      <path d={pricePath} fill="none" stroke="#14161C" strokeWidth="1.5" />
       <line x1="0" y1={stopY} x2={w} y2={stopY} className="mini-stop-line" strokeDasharray="4 3" />
-      <circle cx={w - 2} cy={stopY} r="3" fill="#c8f5e4" stroke="#FF5B1F" strokeWidth="1" />
+      <circle cx={w - 2} cy={stopY} r="3" fill="#1F9D6B" stroke="#14161C" strokeWidth="0.5" />
     </svg>
   );
 }

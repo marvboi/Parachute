@@ -3,8 +3,8 @@ type Props = { progress: number };
 function MiniEye({ active }: { active: boolean }) {
   return (
     <svg viewBox="0 0 48 48" className="loop-svg" aria-hidden>
-      <ellipse cx="24" cy="24" rx="18" ry="10" fill="none" stroke="#FF5B1F" strokeWidth="2" opacity={active ? 1 : 0.4} />
-      <circle cx="24" cy="24" r={active ? 6 : 4} fill="#FF5B1F" className={active ? "pulse-soft" : ""} />
+      <ellipse cx="24" cy="24" rx="18" ry="10" fill="none" stroke={active ? "#FF5B1F" : "#14161C"} strokeWidth="1.5" opacity={active ? 1 : 0.35} />
+      <circle cx="24" cy="24" r={active ? 6 : 4} fill={active ? "#FF5B1F" : "#14161C"} className={active ? "pulse-soft" : ""} opacity={active ? 1 : 0.35} />
     </svg>
   );
 }
@@ -15,8 +15,8 @@ function MiniBolt({ active }: { active: boolean }) {
       <path
         d="M26 6 L14 26 H22 L18 42 L36 20 H27 L30 6 Z"
         fill="none"
-        stroke="#FF5B1F"
-        strokeWidth="2"
+        stroke={active ? "#FF5B1F" : "#14161C"}
+        strokeWidth="1.5"
         opacity={active ? 1 : 0.35}
         className={active ? "pulse-soft" : ""}
       />
@@ -29,9 +29,9 @@ function MiniChute({ active }: { active: boolean }) {
     <svg viewBox="0 0 48 48" className="loop-svg" aria-hidden>
       <path
         d="M8 14 Q24 4 40 14 L24 38 Z"
-        fill={active ? "rgba(255,91,31,0.35)" : "none"}
-        stroke="#FF5B1F"
-        strokeWidth="2"
+        fill={active ? "rgba(255,91,31,0.15)" : "none"}
+        stroke={active ? "#FF5B1F" : "#14161C"}
+        strokeWidth="1.5"
         className={active ? "pulse-soft" : ""}
       />
     </svg>

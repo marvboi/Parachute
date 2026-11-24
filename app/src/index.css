@@ -1,30 +1,33 @@
 :root {
-  --bg: #0a0e1a;
-  --bg-elevated: #0f1424;
-  --bg-card: rgba(18, 24, 42, 0.72);
-  --border: rgba(255, 255, 255, 0.09);
-  --border-bright: rgba(255, 91, 31, 0.35);
-  --text: #f4f6fb;
-  --muted: #94a0b8;
+  --bg: #f3eee4;
+  --bg-elevated: #eae3d6;
+  --bg-card: rgba(255, 255, 255, 0.6);
+  --border: rgba(20, 22, 28, 0.1);
+  --border-bright: rgba(255, 91, 31, 0.45);
+  --text: #14161c;
+  --muted: #5c6170;
   --accent: #ff5b1f;
-  --accent-soft: #ff8f4a;
-  --accent-dim: rgba(255, 91, 31, 0.22);
-  --ok: #45e0a3;
-  --warn: #ffc14a;
-  --danger: #ff5c7a;
+  --accent-soft: #ff5b1f;
+  --accent-dim: rgba(255, 91, 31, 0.18);
+  --ok: #1f9d6b;
+  --warn: #e5484d;
+  --danger: #e5484d;
+  --stable: #1f9d6b;
+  --ink: #14161c;
+  --sky: #cfe3f2;
   --font: "Inter Tight", system-ui, sans-serif;
   --display: "Space Grotesk", var(--font);
   --mono: "JetBrains Mono", ui-monospace, monospace;
-  --radius: 16px;
-  --radius-sm: 12px;
+  --radius: 12px;
+  --radius-sm: 8px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 24px;
   --space-6: 32px;
-  --shadow: 0 32px 80px rgba(0, 0, 0, 0.55);
-  --inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow: 0 1px 2px rgba(20, 22, 28, 0.06), 0 12px 32px rgba(20, 22, 28, 0.05);
+  --inner-glow: none;
 }
 
 *,
@@ -63,22 +66,22 @@ body {
 
 /* Glass panels */
 .glass {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), var(--bg-card);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow), var(--inner-glow);
-  backdrop-filter: blur(20px);
+  background: var(--bg-card);
+  border: 1px solid rgba(20, 22, 28, 0.14);
+  box-shadow: var(--shadow);
+  backdrop-filter: none;
   border-radius: var(--radius);
 }
 
 .glass-pill {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(12px);
+  background: var(--bg-card);
+  border: 1px solid rgba(20, 22, 28, 0.14);
+  backdrop-filter: none;
 }
 
 .glass-inset {
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(20, 22, 28, 0.1);
   border-radius: var(--radius-sm);
 }
 
@@ -420,8 +423,8 @@ body {
 
 .chart-stage {
   border-radius: var(--radius-sm);
-  background: rgba(5, 8, 16, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(20, 22, 28, 0.1);
   padding: var(--space-3);
   overflow: hidden;
   display: flex;
@@ -430,8 +433,9 @@ body {
 }
 
 .chart-stage.flash {
-  animation: pulse-ring 0.9s ease;
-  box-shadow: 0 0 0 1px var(--accent-dim), 0 0 48px rgba(255, 91, 31, 0.22);
+  animation: none;
+  box-shadow: var(--shadow);
+  border-color: rgba(20, 22, 28, 0.18);
 }
 
 @keyframes pulse-ring {
@@ -450,8 +454,8 @@ body {
 }
 
 .chart-grid-line {
-  stroke: rgba(255, 255, 255, 0.04);
-  stroke-width: 0.15;
+  stroke: rgba(20, 22, 28, 0.08);
+  stroke-width: 0.2;
   vector-effect: non-scaling-stroke;
 }
 
@@ -465,13 +469,13 @@ body {
 
 .stop-line {
   fill: none;
-  stroke: #6ee7b7;
+  stroke: var(--stable);
   stroke-width: 1.2;
   stroke-dasharray: 4 4;
 }
 
 .stop-line-glow {
-  filter: drop-shadow(0 0 4px rgba(110, 231, 183, 0.5));
+  filter: none;
 }
 
 .price-dot-core {
@@ -480,7 +484,8 @@ body {
 
 .price-dot-glow {
   fill: var(--accent);
-  opacity: 0.9;
+  opacity: 1;
+  filter: none;
 }
 
 .trigger-pulse {
@@ -512,11 +517,11 @@ body {
 }
 
 .swatch.price {
-  background: var(--accent);
+  background: var(--ink);
 }
 
 .swatch.stop {
-  background: #6ee7b7;
+  background: var(--stable);
 }
 
 .chart-prices {
@@ -527,7 +532,7 @@ body {
 }
 
 .chart-prices .stop {
-  color: #6ee7b7;
+  color: var(--stable);
 }
 
 .chart-caption {
@@ -571,14 +576,14 @@ body {
   cursor: pointer;
   padding: var(--space-4);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: rgba(8, 12, 22, 0.5);
+  border: 1px solid rgba(20, 22, 28, 0.14);
+  background: var(--bg-card);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .position-card.rich.active {
   border-color: var(--border-bright);
-  box-shadow: 0 0 32px var(--accent-dim);
+  box-shadow: var(--shadow);
 }
 
 .card-top {
@@ -600,21 +605,21 @@ body {
 }
 
 .status-chip.glow.armed {
-  background: rgba(69, 224, 163, 0.12);
+  background: rgba(31, 157, 107, 0.12);
   color: var(--ok);
-  box-shadow: 0 0 14px rgba(69, 224, 163, 0.25);
+  box-shadow: none;
 }
 
 .status-chip.glow.triggered {
-  background: rgba(255, 193, 74, 0.12);
+  background: rgba(229, 72, 77, 0.1);
   color: var(--warn);
-  box-shadow: 0 0 14px rgba(255, 193, 74, 0.2);
+  box-shadow: none;
 }
 
 .status-chip.glow.landed {
-  background: rgba(255, 91, 31, 0.15);
-  color: var(--accent-soft);
-  box-shadow: 0 0 14px var(--accent-dim);
+  background: rgba(255, 91, 31, 0.12);
+  color: var(--accent);
+  box-shadow: none;
 }
 
 .status-chip {
@@ -745,7 +750,7 @@ body {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.55);
   color: var(--text);
   cursor: pointer;
   font-family: var(--font);
@@ -755,12 +760,12 @@ body {
 
 .token-option.active {
   border-color: var(--border-bright);
-  box-shadow: 0 0 20px var(--accent-dim);
+  box-shadow: var(--shadow);
 }
 
 .field-polished input {
   width: 100%;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(255, 255, 255, 0.65);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
@@ -800,7 +805,7 @@ body {
   padding: 4px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .segment {
@@ -825,9 +830,9 @@ body {
   top: 4px;
   bottom: 4px;
   border-radius: 10px;
-  background: linear-gradient(145deg, rgba(255, 91, 31, 0.35), rgba(255, 91, 31, 0.15));
+  background: rgba(255, 91, 31, 0.14);
   border: 1px solid rgba(255, 91, 31, 0.35);
-  box-shadow: 0 0 20px var(--accent-dim);
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -857,10 +862,10 @@ body {
 .btn-primary {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #ff5b1f 0%, #ff7a3d 50%, #ff5b1f 100%);
+  background: #ff5b1f;
   background-size: 200% 100%;
   border: none;
-  color: #0a0e1a;
+  color: #fff;
   font-weight: 700;
   padding: 14px 18px;
   border-radius: var(--radius-sm);

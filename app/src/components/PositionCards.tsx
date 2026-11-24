@@ -95,7 +95,7 @@ function CapsulePositionCard({
       </div>
       <div className="capsule-pos-svg">
         <svg viewBox="0 0 140 56" className="capsule-line-svg">
-          <path d={line} fill="none" stroke="#FF5B1F" strokeWidth="1.2" opacity="0.85" />
+          <path d={line} fill="none" stroke="#14161C" strokeWidth="1.2" opacity="0.85" />
           <line
             x1="0"
             y1={40}

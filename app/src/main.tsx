@@ -7,6 +7,7 @@ import { BASE_SEPOLIA_RPC } from "./config/contracts";
 import App from "./App";
 import "./index.css";
 import "./fall.css";
+import "./paper.css";
 
 const queryClient = new QueryClient();
 const wagmiConfig = createConfig({

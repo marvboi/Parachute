@@ -1,0 +1,462 @@
+/* Altimeter paper — theme (loads after fall.css) */
+
+:root {
+  --bg: #f3eee4;
+  --bg-panel: #eae3d6;
+  --bg-paper: rgba(255, 255, 255, 0.6);
+  --ink: #14161c;
+  --ink-secondary: #5c6170;
+  --chute: #ff5b1f;
+  --risk: #e5484d;
+  --stable: #1f9d6b;
+  --sky: #cfe3f2;
+  --rule: rgba(20, 22, 28, 0.1);
+  --rule-hair: rgba(20, 22, 28, 0.14);
+  --text: var(--ink);
+  --muted: var(--ink-secondary);
+  --accent: var(--chute);
+  --shadow-paper: 0 1px 2px rgba(20, 22, 28, 0.06), 0 12px 32px rgba(20, 22, 28, 0.05);
+}
+
+body,
+#root {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.parachute-page {
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+}
+
+.parachute-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cg fill='none' stroke='%2314161C' stroke-width='0.65'%3E%3Cellipse cx='400' cy='400' rx='320' ry='200'/%3E%3Cellipse cx='400' cy='400' rx='240' ry='150'/%3E%3Cellipse cx='400' cy='400' rx='160' ry='100'/%3E%3Cellipse cx='220' cy='320' rx='110' ry='70'/%3E%3Cellipse cx='580' cy='480' rx='130' ry='85'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 480px 480px;
+}
+
+.parachute-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+.parachute-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fall narrative */
+.fall-pin {
+  background: var(--bg) !important;
+  transition: background 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fall-pin.fall-sky {
+  background: linear-gradient(180deg, var(--sky) 0%, var(--bg) 88%) !important;
+}
+
+.fall-vignette {
+  display: none !important;
+}
+
+.fall-cloud-drift {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 42% 18% at 18% 22%, rgba(20, 22, 28, 0.05), transparent 70%),
+    radial-gradient(ellipse 36% 14% at 72% 38%, rgba(20, 22, 28, 0.04), transparent 70%);
+  animation: cloud-drift 52s ease-in-out infinite alternate;
+}
+
+@keyframes cloud-drift {
+  from {
+    transform: translateX(-2%) translateY(0);
+  }
+  to {
+    transform: translateX(3%) translateY(1.5%);
+  }
+}
+
+.fall-grain {
+  opacity: 0.03 !important;
+  mix-blend-mode: multiply !important;
+}
+
+.fall-svg {
+  filter: drop-shadow(0 8px 24px rgba(20, 22, 28, 0.08)) !important;
+}
+
+.fall-svg .alt-grid {
+  stroke: rgba(20, 22, 28, 0.08) !important;
+}
+
+.chart-tick {
+  stroke: rgba(20, 22, 28, 0.2);
+  stroke-width: 0.6;
+}
+
+.speed-streak {
+  stroke: rgba(229, 72, 77, 0.22) !important;
+}
+
+.tether-line {
+  stroke: var(--chute) !important;
+}
+
+.tether-line.flash-once {
+  animation: none;
+  stroke-width: 2.5;
+}
+
+.stable-ground {
+  fill: rgba(31, 157, 107, 0.14) !important;
+}
+
+.ground-mint {
+  fill: var(--stable) !important;
+}
+
+.fall-h1 {
+  color: var(--ink) !important;
+}
+
+.fall-accent {
+  color: var(--chute) !important;
+}
+
+.fall-eyebrow {
+  color: var(--ink-secondary) !important;
+  font-family: var(--mono);
+  font-size: 0.68rem !important;
+  letter-spacing: 0.16em !important;
+}
+
+.fall-lede {
+  color: var(--ink-secondary) !important;
+}
+
+.fall-lede code {
+  background: rgba(20, 22, 28, 0.06) !important;
+  color: var(--ink) !important;
+}
+
+.fall-live,
+.fall-scene-h2 {
+  color: var(--ink) !important;
+}
+
+.fall-alt-mode-inline {
+  color: var(--ink-secondary);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fall-altimeter {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid var(--rule-hair) !important;
+  border-radius: 8px !important;
+  backdrop-filter: none !important;
+  box-shadow: var(--shadow-paper) !important;
+}
+
+.fall-alt-label {
+  color: var(--ink-secondary) !important;
+  font-family: var(--mono) !important;
+}
+
+.fall-alt-value {
+  color: var(--ink) !important;
+}
+
+.fall-alt-sub {
+  color: var(--ink-secondary) !important;
+  font-family: var(--mono);
+  font-size: 0.68rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.fall-alt-mode {
+  color: var(--ink-secondary);
+}
+
+.fall-trail-badge {
+  color: var(--ink-secondary) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid var(--rule-hair) !important;
+  font-family: var(--mono) !important;
+  font-size: 0.65rem !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ripcord-diagram {
+  background: rgba(255, 255, 255, 0.78) !important;
+  border: 1px solid var(--rule-hair) !important;
+  backdrop-filter: none !important;
+  box-shadow: var(--shadow-paper) !important;
+}
+
+.ripcord-step {
+  color: var(--ink-secondary) !important;
+  font-family: var(--mono);
+  font-size: 0.72rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ripcord-step.lit {
+  color: var(--ink) !important;
+}
+
+.ripcord-dot {
+  background: var(--bg-panel) !important;
+  box-shadow: none !important;
+  border: 1px solid var(--rule);
+}
+
+.ripcord-step.lit .ripcord-dot {
+  background: var(--chute) !important;
+  box-shadow: none !important;
+}
+
+.fall-saved,
+.fall-ground-label {
+  color: var(--stable) !important;
+}
+
+.fall-ground-glow {
+  background: radial-gradient(ellipse 85% 55% at 50% 100%, rgba(207, 227, 242, 0.55), transparent) !important;
+}
+
+.fall-capsule-cta {
+  background: var(--chute) !important;
+  border: 1px solid var(--chute) !important;
+  color: #fff !important;
+  box-shadow: var(--shadow-paper) !important;
+  border-radius: 8px !important;
+}
+
+.fall-capsule-cta:hover {
+  box-shadow: 0 4px 20px rgba(255, 91, 31, 0.25) !important;
+  transform: translateX(-50%) scale(1.01) !important;
+}
+
+.pack-title {
+  color: var(--ink) !important;
+}
+
+/* Components */
+.paper-card,
+.panel-app,
+.panel,
+.glass,
+.stat-card,
+.glass-inset,
+.how-card {
+  background: var(--bg-paper) !important;
+  border: 1px solid var(--rule-hair) !important;
+  box-shadow: var(--shadow-paper) !important;
+  backdrop-filter: none !important;
+}
+
+.header-inner {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid var(--rule-hair) !important;
+  box-shadow: var(--shadow-paper) !important;
+}
+
+.header-nav a {
+  color: var(--ink-secondary) !important;
+}
+
+.header-nav a:hover {
+  color: var(--ink) !important;
+}
+
+.wordmark {
+  color: var(--ink) !important;
+}
+
+.glass-pill,
+.demo-toggle {
+  background: var(--bg-paper) !important;
+  border: 1px solid var(--rule-hair) !important;
+  color: var(--ink) !important;
+}
+
+.demo-toggle.on {
+  border-color: var(--chute) !important;
+  box-shadow: none !important;
+}
+
+.muted {
+  color: var(--ink-secondary) !important;
+}
+
+.chart-stage {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid var(--rule) !important;
+}
+
+.chart-stage.flash {
+  animation: none !important;
+  box-shadow: var(--shadow-paper) !important;
+}
+
+.stop-line,
+.chart-prices .stop {
+  color: var(--stable) !important;
+  stroke: var(--stable) !important;
+}
+
+.swatch.stop {
+  background: var(--stable) !important;
+}
+
+.swatch.price {
+  background: var(--ink) !important;
+}
+
+.btn-primary {
+  background: var(--chute) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-paper) !important;
+}
+
+.btn-shine-layer {
+  display: none;
+}
+
+.site-footer {
+  color: var(--ink-secondary) !important;
+}
+
+.stats-strip-badge {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  background: var(--bg-paper);
+  border: 1px solid var(--rule);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.pack-app {
+  background: var(--bg) !important;
+}
+
+.pack-app.ground-stable {
+  background: linear-gradient(180deg, var(--sky) 0%, var(--bg) 45%, var(--bg-panel) 100%) !important;
+}
+
+.panel-app {
+  background: var(--bg-paper) !important;
+}
+
+.price-line-gradient {
+  stroke: var(--ink) !important;
+}
+
+.chart-vert-guide {
+  stroke: rgba(20, 22, 28, 0.15) !important;
+}
+
+.position-card .metric strong,
+.field-stop strong {
+  color: var(--ink) !important;
+}
+
+.field-stop strong,
+.trigger-fill {
+  background: var(--chute) !important;
+}
+
+.progress-bar .trigger-fill {
+  background: linear-gradient(90deg, var(--chute), rgba(255, 91, 31, 0.75)) !important;
+}
+
+.how-rail .how-card {
+  background: var(--bg-paper) !important;
+}
+
+.site-header.glass {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 720px) {
+  .header-inner {
+    flex-wrap: wrap;
+    row-gap: 10px;
+    padding: 10px 12px !important;
+  }
+
+  .header-nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0 !important;
+    justify-content: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .demo-toggle {
+    margin-left: auto;
+    font-size: 0.78rem;
+    padding: 6px 10px;
+  }
+
+  .fall-altimeter {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    margin: 88px auto 0;
+    text-align: center;
+    width: min(100%, 280px);
+  }
+
+  .fall-split {
+    padding-top: 16px !important;
+    width: calc(100% - 32px) !important;
+  }
+
+  .fall-scene-h2 {
+    max-width: none;
+  }
+
+  .fall-visual-panel {
+    min-height: 42vh;
+  }
+
+  .pack-app {
+    padding-top: 88px;
+  }
+
+  .pack-header {
+    padding-top: 8px;
+  }
+
+  .ripcord-diagram {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin: 16px 24px;
+    max-width: calc(100% - 48px);
+  }
+}

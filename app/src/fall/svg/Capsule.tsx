@@ -13,7 +13,7 @@ export function Capsule({ x, y, scale = 1, tokenGlyph, id = "capsule" }: Props) 
       <rect x="-12" y="-8" width="24" height="16" rx="8" fill="#FF5B1F" />
       <rect x="-8" y="-5" width="16" height="10" rx="5" fill="#ff8f4a" opacity="0.45" />
       {tokenGlyph && (
-        <text x="0" y="4" textAnchor="middle" fill="#0A0E1A" fontSize="8" fontWeight="700" fontFamily="JetBrains Mono">
+        <text x="0" y="4" textAnchor="middle" fill="#14161C" fontSize="8" fontWeight="700" fontFamily="JetBrains Mono">
           {tokenGlyph}
         </text>
       )}

@@ -17,6 +17,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 type Props = {
   ethSpot: number;
+  demoMode: boolean;
   onReachApp: () => void;
 };
 
@@ -32,7 +33,7 @@ function localT(progress: number): number {
   return p - Math.floor(p);
 }
 
-export function FallNarrative({ ethSpot, onReachApp }: Props) {
+export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
   const { reduce } = useMotionSafe();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
@@ -66,6 +67,7 @@ export function FallNarrative({ ethSpot, onReachApp }: Props) {
     scene >= 3 ? Math.min(1, scene === 3 ? t * 1.2 : scene > 3 ? 0.85 + t * 0.15 : 0) : 0;
   const tetherFlash = scene === 3 && t > 0.72 && t < 0.88;
   const groundGlow = scene >= 4;
+  const skyScene = scene >= 3;
   const tilt = scene === 1 ? Math.min(6, t * 6) : 0;
   const showTether = scene >= 2;
   const showTrailLabel = scene >= 2 && scene <= 3;
@@ -126,7 +128,7 @@ export function FallNarrative({ ethSpot, onReachApp }: Props) {
     return (
       <section className="fall-fallback" aria-label="Story preview" data-scene={SCENE_NAMES[staticScene]}>
         <div className="fall-split">
-          <PhaseCopy scene={staticScene} ethSpot={ethSpot} savedDemo={savedDemo} price={priceDisplay} />
+          <PhaseCopy scene={staticScene} ethSpot={ethSpot} demoMode={demoMode} savedDemo={savedDemo} price={priceDisplay} />
           <div className="fall-visual-panel">
             <svg viewBox={`0 0 ${W} ${H}`} className="fall-svg">
               <FallSvgLayer
@@ -167,24 +169,26 @@ export function FallNarrative({ ethSpot, onReachApp }: Props) {
       data-progress={progress.toFixed(3)}
       data-scene={SCENE_NAMES[scene]}
     >
-      <div className="fall-pin">
+      <div className={`fall-pin ${skyScene ? "fall-sky" : ""}`}>
         <div className="fall-grain" aria-hidden />
-        <div className="fall-vignette" style={{ opacity: 0.1 + progress * 0.18 }} aria-hidden />
+        <div className="fall-cloud-drift" aria-hidden />
         <div className="fall-altimeter tabular" aria-live="polite">
-          <span className="fall-alt-label">Altitude</span>
+          <span className="fall-alt-label">ALT</span>
           <span className="fall-alt-value">${priceDisplay.toFixed(2)}</span>
-          <span className="fall-alt-sub">ETH/USD live</span>
+          <span className="fall-alt-sub">
+            ETH/USD · <span className="fall-alt-mode">{demoMode ? "demo" : "live"}</span>
+          </span>
         </div>
 
         <div className="fall-split">
-          <PhaseCopy scene={scene} ethSpot={ethSpot} savedDemo={savedDemo} price={priceDisplay} />
+          <PhaseCopy scene={scene} ethSpot={ethSpot} demoMode={demoMode} savedDemo={savedDemo} price={priceDisplay} />
           <div className="fall-visual-panel">
             <div className="fall-stage" style={{ transform: `rotate(${tilt}deg)` }}>
               <svg viewBox={`0 0 ${W} ${H}`} className="fall-svg" role="img" aria-label="Price path and capsule">
                 <FallSvgLayer {...visualProps} />
               </svg>
             </div>
-            {showTrailLabel && <span className="fall-trail-badge tabular">{trailPct}% trail</span>}
+            {showTrailLabel && <span className="fall-trail-badge tabular">TRAIL {trailPct}%</span>}
           </div>
         </div>
 
@@ -214,11 +218,13 @@ function PhaseCopy({
   scene,
   price,
   ethSpot,
+  demoMode,
   savedDemo,
 }: {
   scene: number;
   price: number;
   ethSpot: number;
+  demoMode: boolean;
   savedDemo?: number;
 }) {
   return (
@@ -235,7 +241,9 @@ function PhaseCopy({
             Parachute watches real Chainlink <code>AnswerUpdated</code> events on Base Sepolia, reacts on Lasna, and
             callbacks your vault before the dip becomes a crash.
           </p>
-          <p className="fall-live tabular">ETH/USD ${ethSpot.toFixed(2)}</p>
+          <p className="fall-live tabular">
+            ETH/USD ${ethSpot.toFixed(2)} <span className="fall-alt-mode-inline">{demoMode ? "· demo" : "· live"}</span>
+          </p>
         </>
       )}
       {scene === 1 && <h2 className="fall-scene-h2 proposed-copy">Crashes don&apos;t wait for you to wake up.</h2>}
@@ -285,8 +293,8 @@ function FallSvgLayer({
     <>
       <defs>
         <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#1a2238" />
-          <stop offset="100%" stopColor="#0A0E1A" />
+          <stop offset="0%" stopColor={groundGlow || canopyOpen > 0 ? "#CFE3F2" : "#F3EEE4"} />
+          <stop offset="100%" stopColor={groundGlow ? "#EAE3D6" : "#F3EEE4"} />
         </linearGradient>
         <filter id="capsuleGlow">
           <feGaussianBlur stdDeviation="4" result="b" />
@@ -296,13 +304,18 @@ function FallSvgLayer({
           </feMerge>
         </filter>
         <linearGradient id="priceStroke" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#FF5B1F" stopOpacity="0.65" />
-          <stop offset="100%" stopColor="#FF5B1F" />
+          <stop offset="0%" stopColor="#14161C" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#14161C" />
         </linearGradient>
       </defs>
-      <rect width={W} height={H} rx="12" fill="url(#skyGrad)" stroke="rgba(255,255,255,0.08)" />
+      <rect width={W} height={H} rx="8" fill="url(#skyGrad)" stroke="rgba(20,22,28,0.12)" />
       {[0.2, 0.4, 0.6, 0.8].map((gy) => (
-        <line key={gy} x1="8" x2={W - 8} y1={H * gy} y2={H * gy} className="alt-grid" />
+        <g key={gy}>
+          <line x1="8" x2={W - 8} y1={H * gy} y2={H * gy} className="alt-grid" />
+          {[0.25, 0.5, 0.75].map((tx) => (
+            <line key={tx} x1={8 + (W - 16) * tx} x2={8 + (W - 16) * tx} y1={H * gy - 3} y2={H * gy + 3} className="chart-tick" />
+          ))}
+        </g>
       ))}
       {streaks &&
         Array.from({ length: 6 }).map((_, i) => (
@@ -316,7 +329,7 @@ function FallSvgLayer({
             opacity={0.2 + (i % 2) * 0.1}
           />
         ))}
-      <path d={fullPath} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
+      <path d={fullPath} fill="none" stroke="rgba(20,22,28,0.12)" strokeWidth="1" stroke-dasharray="4 4" />
       <path d={pathDrawn} fill="none" stroke="url(#priceStroke)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       {tetherLen > 8 && (
         <>
