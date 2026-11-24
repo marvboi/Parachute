@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import type { Position } from "../data/demoSeed";
-import { PROOF_PRICES, buildPriceSeries, buildDemoTimeline, buildLiveTimeline } from "../data/demoSeed";
+import { PROOF_PRICES, buildDemoTimeline, buildLiveTimeline } from "../data/demoSeed";
+import { buildPositionMiniViz } from "../lib/positionViz";
 import { contracts, explorerAddress } from "../config/contracts";
 import { useMotionSafe } from "../lib/motion";
 import { CrossChainTimeline } from "./CrossChainTimeline";
@@ -13,22 +14,6 @@ type Props = {
   selectedId: string;
   liveSource?: boolean;
 };
-
-function miniLinePath(token: Position["token"]): string {
-  const base = PROOF_PRICES[token];
-  const pts = buildPriceSeries(base, 20);
-  const w = 140;
-  const h = 56;
-  const max = Math.max(...pts);
-  const min = Math.min(...pts);
-  return pts
-    .map((v, i) => {
-      const x = (i / (pts.length - 1)) * w;
-      const y = h - ((v - min) / (max - min || 1)) * h;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-}
 
 function triggerDistance(position: Position): number {
   const spot = position.liveSpot ?? PROOF_PRICES[position.token];
@@ -88,38 +73,50 @@ function CapsulePositionCard({
   const { tween, stagger, reduce } = useMotionSafe();
   const dist = triggerDistance(position);
   const spot = position.liveSpot ?? PROOF_PRICES[position.token];
-  const line = miniLinePath(position.token);
+  const viz = buildPositionMiniViz(position, spot);
   const showTimeline = position.status === "triggered" || (position.onChain && position.status === "armed");
+  const armed = position.status === "armed";
 
   return (
     <motion.article
-      className={`capsule-position ${active ? "active" : ""} state-${position.status}`}
+      className={`capsule-position ${active ? "active" : ""} state-${position.status} ${armed ? "is-armed" : ""}`}
       role="button"
       tabIndex={0}
       onClick={onSelect}
       onKeyDown={(e) => e.key === "Enter" && onSelect()}
       initial={reduce ? false : { opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0, scale: active ? 1.01 : 1 }}
+      whileTap={reduce ? {} : { scale: 0.992 }}
       transition={{ ...tween, delay: index * stagger }}
+      layout={!reduce}
     >
+      {armed && <span className="armed-aura" aria-hidden />}
       <div className="capsule-pos-head">
         <TokenIcon symbol={position.token} size={22} />
         <StatusChip status={position.status} />
       </div>
       <div className="capsule-pos-svg">
-        <svg viewBox="0 0 140 56" className="capsule-line-svg">
-          <path d={line} fill="none" stroke="#14161C" strokeWidth="1.2" opacity="0.85" />
-          <line
-            x1="0"
-            y1={40}
-            x2="140"
-            y2={40}
-            stroke="#FF5B1F"
-            strokeDasharray="3 3"
-            opacity="0.45"
+        <svg viewBox={`0 0 ${viz.w} ${viz.h}`} className="capsule-line-svg">
+          <defs>
+            <linearGradient id={`pos-fill-${position.id}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#1f9d6b" stopOpacity="0.14" />
+              <stop offset="100%" stopColor="#e5484d" stopOpacity="0.06" />
+            </linearGradient>
+          </defs>
+          <line x1="0" x2={viz.w} y1={viz.highY} y2={viz.highY} className="viz-high-tick" />
+          <path d={viz.zonePath} fill={`url(#pos-fill-${position.id})`} opacity="0.9" />
+          <path d={viz.stopPath} className="viz-stop-line" />
+          <path d={viz.pricePath} className="viz-price-line" />
+          <motion.circle
+            cx={viz.dotX}
+            cy={viz.dotY}
+            r="3.2"
+            className="viz-price-dot"
+            animate={reduce || !armed ? {} : { opacity: [0.85, 1, 0.85] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
           />
-          <g transform="translate(110, 22)">
-            <Capsule x={0} y={0} scale={0.85} tokenGlyph={position.token.slice(0, 1)} />
+          <g transform={`translate(${viz.dotX - 12}, ${viz.dotY + 4})`}>
+            <Capsule x={0} y={0} scale={0.72} tokenGlyph={position.token.slice(0, 1)} />
           </g>
           {position.status === "triggered" && (
             <path d="M100 10 Q115 0 130 10" fill="rgba(255,91,31,0.5)" stroke="#FF5B1F" strokeWidth="0.8" />
@@ -145,8 +142,15 @@ function CapsulePositionCard({
       </dl>
       <div className="trigger-distance">
         <span>Trigger distance</span>
-        <div className="trigger-track">
-          <div className="trigger-fill" style={{ width: `${dist}%`, background: intensity(dist) }} />
+        <div className="trigger-track" role="progressbar" aria-valuenow={Math.round(dist)} aria-valuemin={0} aria-valuemax={100}>
+          <motion.div
+            className="trigger-fill"
+            initial={false}
+            animate={{ width: `${dist}%` }}
+            transition={{ type: "spring", stiffness: 120, damping: 22 }}
+            style={{ background: intensity(dist) }}
+          />
+          {armed && <span className="trigger-needle" style={{ left: `${dist}%` }} aria-hidden />}
         </div>
       </div>
       <p className="pos-stop-type">

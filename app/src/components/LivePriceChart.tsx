@@ -43,8 +43,12 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
     const dotX = scaleX(lastI);
     const dotY = scaleY(visible[visible.length - 1] ?? basePrice);
     const stopY = scaleY(stops[stops.length - 1] ?? basePrice);
+  let peak = visible[0] ?? basePrice;
+  for (const p of visible) if (p > peak) peak = p;
+    const highY = scaleY(peak);
+    const cushionPath = `${pricePath} L${dotX.toFixed(2)},${stopY.toFixed(2)} L0,${stopY.toFixed(2)} Z`;
 
-    return { pricePath, stopLine, dotX, dotY, stopY, h, w, high };
+    return { pricePath, stopLine, dotX, dotY, stopY, highY, cushionPath, h, w, high };
   }, [series, frame, basePrice, trailPct]);
 
   const riseEnd = Math.floor(series.length * 0.82);
@@ -108,7 +112,14 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
           </span>
         </div>
         <div className="chart-prices tabular">
-          <span>${latest.toFixed(2)}</span>
+          <motion.span
+            key={latest.toFixed(2)}
+            initial={reduce ? false : { opacity: 0.6, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            ${latest.toFixed(2)}
+          </motion.span>
           <span className="stop">${stopNow.toFixed(2)}</span>
         </div>
       </header>
@@ -116,8 +127,12 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
         <svg viewBox={`0 0 ${chart.w} ${chart.h}`} preserveAspectRatio="none" className="chart-svg chart-svg-tall">
           <defs>
             <linearGradient id={`${gid}-fill`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#14161C" stopOpacity="0.12" />
+              <stop offset="0%" stopColor="#14161C" stopOpacity="0.14" />
               <stop offset="100%" stopColor="#14161C" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id={`${gid}-cushion`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#1f9d6b" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="#e5484d" stopOpacity="0.12" />
             </linearGradient>
             <linearGradient id={`${gid}-line`} x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#14161C" stopOpacity="0.7" />
@@ -131,6 +146,8 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
             d={`${chart.pricePath} L${(frame / (series.length - 1)) * chart.w},${chart.h} L0,${chart.h} Z`}
             fill={`url(#${gid}-fill)`}
           />
+          <path d={chart.cushionPath} fill={`url(#${gid}-cushion)`} opacity="0.85" />
+          <line x1="0" x2={chart.w} y1={chart.highY} y2={chart.highY} className="chart-peak-tick" />
           <motion.path
             d={chart.stopLine}
             className="stop-line stop-line-glow"

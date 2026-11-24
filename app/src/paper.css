@@ -591,6 +591,35 @@ body,
 
 .fall-visual-panel {
   align-self: stretch;
+  isolation: isolate;
+}
+
+.fall-visual-panel::after {
+  content: "";
+  position: absolute;
+  inset: 8% 6% 10%;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse 70% 55% at 50% 42%, rgba(255, 91, 31, 0.1), transparent 68%);
+  opacity: 0.85;
+}
+
+.fall-stage {
+  position: relative;
+  z-index: 1;
+}
+
+.fall-h1 {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.fall-altimeter {
+  transition: box-shadow var(--motion-fast), transform var(--motion-fast);
+}
+
+.fall-alt-value {
+  transition: color 280ms ease;
 }
 
 .fall-split {
@@ -856,4 +885,119 @@ body,
     padding-left: 12px;
     padding-right: 12px;
   }
+}
+
+/* Data-viz + armed card premium layer */
+.capsule-position.is-armed {
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
+}
+
+.capsule-position.is-armed .armed-aura {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 91, 31, 0.22),
+    transparent 38%,
+    rgba(31, 157, 107, 0.14) 72%,
+    transparent
+  );
+  opacity: 0.65;
+  animation: armed-aura 4.5s ease-in-out infinite;
+}
+
+@keyframes armed-aura {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.capsule-position.is-armed.active {
+  box-shadow:
+    0 0 0 1px rgba(255, 91, 31, 0.28),
+    0 14px 36px rgba(20, 22, 28, 0.09),
+    0 4px 14px rgba(31, 157, 107, 0.08);
+}
+
+.viz-price-line {
+  fill: none;
+  stroke: #14161c;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.viz-stop-line {
+  stroke: #1f9d6b;
+  stroke-width: 1.1;
+  stroke-dasharray: 4 3;
+  fill: none;
+  opacity: 0.85;
+}
+
+.viz-high-tick {
+  stroke: rgba(255, 91, 31, 0.35);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 4;
+}
+
+.viz-price-dot {
+  fill: #ff5b1f;
+  filter: drop-shadow(0 0 3px rgba(255, 91, 31, 0.55));
+}
+
+.status-chip.armed {
+  box-shadow: 0 0 0 1px rgba(31, 157, 107, 0.35), 0 0 14px rgba(31, 157, 107, 0.2);
+  animation: chip-armed 2.8s ease-in-out infinite;
+}
+
+@keyframes chip-armed {
+  50% {
+    box-shadow: 0 0 0 1px rgba(31, 157, 107, 0.5), 0 0 18px rgba(31, 157, 107, 0.28);
+  }
+}
+
+.trigger-track {
+  position: relative;
+  overflow: visible;
+}
+
+.trigger-needle {
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: #ff5b1f;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 10px rgba(255, 91, 31, 0.45);
+  transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chart-peak-tick {
+  stroke: rgba(255, 91, 31, 0.28);
+  stroke-width: 0.35;
+  stroke-dasharray: 1.5 3;
+}
+
+.chart-stage-fill {
+  position: relative;
+}
+
+.chart-stage-fill::before {
+  content: "";
+  position: absolute;
+  inset: 12px 10px auto;
+  height: 40%;
+  border-radius: 8px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(207, 227, 242, 0.22), transparent);
+}
+
+.chart-hero .chart-stage {
+  border-color: rgba(20, 22, 28, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }

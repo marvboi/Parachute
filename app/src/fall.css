@@ -658,6 +658,8 @@
 }
 
 .capsule-position {
+  position: relative;
+  overflow: hidden;
   padding: 16px 15px;
   border-radius: 10px;
   border: 1px solid rgba(20, 22, 28, 0.11);
