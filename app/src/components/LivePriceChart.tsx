@@ -20,9 +20,10 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
 
   const chart = useMemo(() => {
     const visible = series.slice(0, frame + 1);
-    let high = visible[0] ?? basePrice;
+    let high = series[0] ?? basePrice;
     const stops: number[] = [];
-    for (const p of visible) {
+    for (let i = 0; i < visible.length; i++) {
+      const p = visible[i] ?? basePrice;
       if (p > high) high = p;
       stops.push(high * (1 - trailPct / 100));
     }
@@ -46,14 +47,17 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
     return { pricePath, stopLine, dotX, dotY, stopY, h, w, high };
   }, [series, frame, basePrice, trailPct]);
 
+  const riseEnd = Math.floor(series.length * 0.82);
+
   useEffect(() => {
     if (!animated) {
-      setFrame(series.length - 1);
+      setFrame(Math.floor(series.length * 0.58));
+      setTriggerFlash(false);
       return;
     }
-    setFrame(8);
+    setFrame(4);
     setTriggerFlash(false);
-    let i = 8;
+    let i = 4;
     const id = window.setInterval(() => {
       i += 1;
       setFrame(i);
@@ -62,13 +66,27 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
         setTriggerFlash(true);
       }
     }, reduce ? 0 : 95);
-    return () => window.clearInterval(id);
-  }, [animated, series, token, basePrice, reduce]);
+    return () => clearInterval(id);
+  }, [animated, series, token, basePrice, reduce, trailPct]);
+
+  const showTriggerPulse = triggerFlash && frame >= riseEnd;
+
+  useEffect(() => {
+    if (!animated || !showTriggerPulse) return;
+    const reset = window.setTimeout(() => {
+      setFrame(Math.floor(series.length * 0.58));
+      setTriggerFlash(false);
+    }, 2400);
+    return () => clearTimeout(reset);
+  }, [animated, showTriggerPulse, series.length]);
 
   const latest = series[frame] ?? basePrice;
   const stopNow = (() => {
     const slice = series.slice(0, frame + 1);
-    const high = Math.max(...slice);
+    let high = slice[0] ?? basePrice;
+    for (const p of slice) {
+      if (p > high) high = p;
+    }
     return high * (1 - trailPct / 100);
   })();
 
@@ -94,7 +112,7 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
           <span className="stop">${stopNow.toFixed(2)}</span>
         </div>
       </header>
-      <div className={`chart-stage chart-stage-fill ${triggerFlash ? "flash" : ""}`}>
+      <div className={`chart-stage chart-stage-fill ${showTriggerPulse ? "flash" : ""}`}>
         <svg viewBox={`0 0 ${chart.w} ${chart.h}`} preserveAspectRatio="none" className="chart-svg chart-svg-tall">
           <defs>
             <linearGradient id={`${gid}-fill`} x1="0" y1="0" x2="0" y2="1">
@@ -135,7 +153,7 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
           />
           <circle cx={chart.dotX} cy={chart.dotY} r="2.8" className="price-dot-glow" filter={`url(#${gid}-dot)`} />
           <circle cx={chart.dotX} cy={chart.dotY} r="1.1" className="price-dot-core" />
-          {triggerFlash && (
+          {showTriggerPulse && (
             <motion.circle
               cx={chart.dotX}
               cy={chart.dotY}

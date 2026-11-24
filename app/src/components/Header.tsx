@@ -13,17 +13,19 @@ export function Header({ demoMode, onToggleDemo, minimal }: Props) {
 
   return (
     <motion.header
-      className={`site-header glass header-bar ${minimal ? "header-minimal" : ""}`}
+      className={`site-header glass header-bar ${minimal ? "header-minimal" : "header-shell"}`}
       initial={reduce ? false : { opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <ParachuteLogo size={36} />
-      <nav className="header-nav" aria-label="Primary">
-        <a href="#positions">Positions</a>
-        <a href="#create">Create stop</a>
-        <a href="#timeline">Cross-chain</a>
-      </nav>
-      <MotionToggle demoMode={demoMode} onToggleDemo={onToggleDemo} />
+      <div className="header-inner">
+        <ParachuteLogo size={36} />
+        <nav className="header-nav" aria-label="Primary">
+          <a href="#positions">Positions</a>
+          <a href="#create">Create stop</a>
+          <a href="#timeline">Cross-chain</a>
+        </nav>
+        <MotionToggle demoMode={demoMode} onToggleDemo={onToggleDemo} />
+      </div>
     </motion.header>
   );
 }

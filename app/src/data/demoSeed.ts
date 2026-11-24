@@ -121,16 +121,26 @@ export function buildDemoTimeline(token: TokenSymbol): TimelineStep[] {
   ];
 }
 
-/** Synthetic intraday series for chart animation, anchored to proof prices */
+/**
+ * Demo price path: rise → trailing stop below highs → single fall through stop at the end.
+ */
 export function buildPriceSeries(base: number, points = 80): number[] {
   const out: number[] = [];
-  let p = base * 0.96;
+  const riseEnd = Math.floor(points * 0.82);
+  const peak = base * 1.09;
+  const start = base * 0.95;
+
   for (let i = 0; i < points; i++) {
-    const drift = Math.sin(i / 6) * base * 0.012 + (i / points) * base * 0.045;
-    const noise = (Math.sin(i * 1.7) + Math.cos(i * 0.9)) * base * 0.004;
-    p = Math.max(base * 0.88, p * 0.992 + drift * 0.08 + noise);
-    if (i > points - 14) p -= base * 0.0022 * (i - (points - 14));
-    out.push(Number(p.toFixed(2)));
+    if (i <= riseEnd) {
+      const u = i / riseEnd;
+      const wave = Math.sin(i * 0.35) * base * 0.008;
+      out.push(Number((start + (peak - start) * u + wave).toFixed(2)));
+    } else {
+      const u = (i - riseEnd) / (points - 1 - riseEnd);
+      const stop = peak * (1 - 0.05);
+      const end = stop * 0.97;
+      out.push(Number((peak - (peak - end) * u).toFixed(2)));
+    }
   }
   return out;
 }

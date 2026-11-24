@@ -65,8 +65,12 @@ export default function App() {
       <Header demoMode={demoMode} onToggleDemo={() => setDemoMode((d) => !d)} minimal />
       <FallNarrative ethSpot={ethSpot} onReachApp={onReachApp} />
       <PackingDeck swapGround={swapGround}>
-        <StatsStrip positions={positions} demoMode={demoMode} />
-        <div className="app-deck-grid">
+        <div className="page-container">
+          <header className="pack-header">
+            <h2 className="pack-title proposed-copy">Pack your parachute</h2>
+          </header>
+          <StatsStrip positions={positions} demoMode={demoMode} />
+          <div className="app-deck-grid">
           <LivePriceChart
             token={selected.token}
             basePrice={spot}
@@ -80,7 +84,8 @@ export default function App() {
             onLandingMode={setSwapGround}
             armedCount={positions.filter((p) => p.status === "armed").length}
           />
-          <CrossChainTimeline steps={timeline} />
+            <CrossChainTimeline steps={timeline} />
+          </div>
         </div>
       </PackingDeck>
       <footer className="site-footer">

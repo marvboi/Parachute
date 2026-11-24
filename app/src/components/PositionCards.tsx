@@ -116,19 +116,19 @@ function CapsulePositionCard({
       <p className="tabular pos-amount">
         {position.amount} {position.token}
       </p>
-      <dl className="capsule-metrics tabular">
-        <span>
+      <dl className="capsule-metrics tabular stats-row-3">
+        <div className="stat-cell">
           <dt>Price</dt>
           <dd className="live-value">${spot.toFixed(2)}</dd>
-        </span>
-        <span>
+        </div>
+        <div className="stat-cell">
           <dt>Peak</dt>
           <dd>${position.highWater.toLocaleString()}</dd>
-        </span>
-        <span>
+        </div>
+        <div className="stat-cell">
           <dt>Stop</dt>
           <dd>${position.stopLevel.toLocaleString()}</dd>
-        </span>
+        </div>
       </dl>
       <div className="trigger-distance">
         <span>Trigger distance</span>
