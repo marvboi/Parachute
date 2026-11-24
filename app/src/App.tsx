@@ -129,9 +129,6 @@ export default function App() {
           </div>
         </div>
       </PackingDeck>
-      <footer className="site-footer">
-        <p>Parachute · Reactive buildathon — public data only · Base Sepolia Chainlink + Lasna reactive</p>
-      </footer>
     </div>
   );
 }
