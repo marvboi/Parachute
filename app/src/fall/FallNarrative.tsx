@@ -184,11 +184,11 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
       data-scene={SCENE_NAMES[scene]}
     >
       <div className={`fall-pin ${skyScene ? "fall-sky" : ""} ${narrativeExited ? "fall-pin-exited" : ""}`}>
-        <DriftingParachutes zone="hero" />
-        {skyScene && <DriftingParachutes zone="landing" />}
-        {scene >= 5 && <DriftingParachutes zone="cta" />}
         <div className="fall-grain" aria-hidden />
         <div className="fall-cloud-drift" aria-hidden />
+        <DriftingParachutes zone="hero" />
+        {scene === 4 && <DriftingParachutes zone="landing" />}
+        {(scene === 5 || scene === 6) && <DriftingParachutes zone="cta" />}
         <div className="fall-altimeter tabular" aria-live="polite">
           <span className="fall-alt-label">ALT</span>
           <span className="fall-alt-value">${priceDisplay.toFixed(2)}</span>
@@ -198,7 +198,13 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
         </div>
 
         <div className="fall-split">
-          <PhaseCopy scene={scene} demoMode={demoMode} savedDemo={savedDemo} price={priceDisplay} />
+          <PhaseCopy
+            scene={scene}
+            demoMode={demoMode}
+            savedDemo={savedDemo}
+            price={priceDisplay}
+            fundsSaved={scene === 4 ? Math.floor(savedDemo * (0.35 + t * 0.65)) : undefined}
+          />
           <div className="fall-visual-panel">
             <div className="fall-stage" style={{ transform: `rotate(${tilt}deg)` }}>
               <svg viewBox={`0 0 ${W} ${H}`} className="fall-svg" role="img" aria-label="Price path and capsule">
@@ -210,12 +216,6 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
         </div>
 
         {scene === 3 && <RipcordDiagram step={Math.min(2, Math.floor(t * 3.2))} />}
-        {scene === 4 && (
-          <p className="fall-saved tabular">
-            Example: funds saved <strong>${Math.floor(savedDemo * (0.35 + t * 0.65)).toLocaleString()}</strong>{" "}
-            <span className="demo-tag">(demo)</span>
-          </p>
-        )}
         {scene === 5 && <HowItWorksRail progress={t} />}
         {groundGlow && <div className="fall-ground-glow" style={{ opacity: 0.35 + t * 0.35 }} aria-hidden />}
         {showScrollCta && (
@@ -246,11 +246,13 @@ function PhaseCopy({
   price,
   demoMode,
   savedDemo,
+  fundsSaved,
 }: {
   scene: number;
   price: number;
   demoMode: boolean;
   savedDemo?: number;
+  fundsSaved?: number;
 }) {
   return (
     <div className="fall-copy" data-scene-index={scene}>
@@ -276,7 +278,15 @@ function PhaseCopy({
       {scene === 3 && <h2 className="fall-scene-h2 proposed-copy">Price breaks the line. The chute opens.</h2>}
       {scene === 4 && <h2 className="fall-scene-h2 proposed-copy">Land safely in stables.</h2>}
       {scene === 4 && savedDemo !== undefined && (
-        <p className="fall-ground-label">stable ground · ${price.toFixed(0)}</p>
+        <>
+          <p className="fall-ground-label">stable ground · ${price.toFixed(0)}</p>
+          {fundsSaved !== undefined && (
+            <p className="fall-saved fall-saved-inline tabular">
+              Example: funds saved <strong>${fundsSaved.toLocaleString()}</strong>{" "}
+              <span className="demo-tag">(demo)</span>
+            </p>
+          )}
+        </>
       )}
       {scene === 6 && <h2 className="fall-scene-h2 proposed-copy">Pack your parachute</h2>}
     </div>
@@ -354,7 +364,15 @@ function FallSvgLayer({
             opacity={0.2 + (i % 2) * 0.1}
           />
         ))}
-      <path d={fullPath} fill="none" stroke="rgba(20,22,28,0.1)" strokeWidth="1" stroke-dasharray="4 4" />
+      <path
+        d={fullPath}
+        fill="none"
+        stroke="#14161C"
+        strokeOpacity="0.42"
+        strokeWidth="2.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       {(() => {
         const m = pathDrawn.match(/^M([\d.]+),([\d.]+)/);
         const sx = m ? Number(m[1]) : 12;

@@ -16,7 +16,7 @@ async function scrollToScene(page, target) {
   for (let pass = 0; pass < 28; pass++) {
     const mid = Math.floor((lo + hi) / 2);
     await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), mid);
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(450);
     await page.evaluate(async () => {
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     });
@@ -33,23 +33,27 @@ async function scrollToScene(page, target) {
   }
 
   await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), bestY);
-  await page.waitForTimeout(550);
+  await page.waitForTimeout(1500);
 }
+
+const LOAD_SETTLE_MS = 1500;
+const SCENE_SETTLE_MS = 1500;
 
 async function captureSet(browser, viewport, prefix) {
   const page = await browser.newPage({ viewport });
   await page.goto("http://127.0.0.1:4173/", { waitUntil: "networkidle" });
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(LOAD_SETTLE_MS);
 
   for (const name of SCENES) {
     await scrollToScene(page, name);
     const scene = await getScene(page);
     if (scene !== name) console.warn(`${prefix}: expected ${name}, got ${scene}`);
+    await page.waitForTimeout(SCENE_SETTLE_MS);
     await page.screenshot({ path: `${BASE}/scene-${prefix}-${name}.png` });
   }
 
   await page.evaluate(() => document.querySelector("#pack-app")?.scrollIntoView({ block: "start", behavior: "instant" }));
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(SCENE_SETTLE_MS);
   await page.screenshot({ path: `${BASE}/scene-${prefix}-app.png` });
   await page.close();
 }
