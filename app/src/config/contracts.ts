@@ -29,7 +29,8 @@ export function explorerAddress(explorer: keyof typeof EXPLORERS, address: strin
 }
 
 /** Set when public repo URL is available; hide “View source on GitHub” when empty. */
-export const GITHUB_CONTRACTS_SOURCE_URL = "";
+/** Public contracts repo (site may outlive monorepo layout). */
+export const GITHUB_CONTRACTS_SOURCE_URL = "https://github.com/marvboi/Parachute";
 
 export const DEPLOYED_CONTRACTS = {
   reactive: {
