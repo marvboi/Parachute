@@ -5,6 +5,7 @@ import { LivePriceChart } from "./components/LivePriceChart";
 import { PositionCards } from "./components/PositionCards";
 import { CreateStopFlow, type CreateStopDraft } from "./components/CreateStopFlow";
 import { CrossChainTimeline } from "./components/CrossChainTimeline";
+import { StatsStrip } from "./components/StatsStrip";
 import { DEMO_POSITIONS, PROOF_PRICES, buildDemoTimeline } from "./data/demoSeed";
 import { useChainlinkPrices } from "./hooks/useChainlinkPrice";
 import { hasDeployments } from "./config/contracts";
@@ -24,10 +25,7 @@ export default function App() {
     return PROOF_PRICES[selected.token];
   }, [demoMode, live.data, selected.token]);
 
-  const timeline = useMemo(
-    () => buildDemoTimeline(selected.token),
-    [selected.token],
-  );
+  const timeline = useMemo(() => buildDemoTimeline(selected.token), [selected.token]);
 
   const onCreate = (draft: CreateStopDraft) => {
     const id = `p${positions.length + 1}`;
@@ -58,49 +56,28 @@ export default function App() {
       <Header demoMode={demoMode} onToggleDemo={() => setDemoMode((d) => !d)} />
       <main>
         <Hero activeToken={selected.token} spot={spot} reactiveReady={hasDeployments() || demoMode} />
-        <MotionHeroGrid
-          selectedToken={selected.token}
-          spot={spot}
-          trailPct={selected.stopType === "trailing" ? selected.trailPct : 0}
-          demoMode={demoMode}
-          positions={positions}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          onCreate={onCreate}
-          timeline={timeline}
-        />
+        <StatsStrip positions={positions} demoMode={demoMode} />
+        <div className="layout-12">
+          <div className="col-chart">
+            <LivePriceChart
+              token={selected.token}
+              basePrice={spot}
+              trailPct={selected.stopType === "trailing" ? selected.trailPct : 5}
+              animated={demoMode}
+            />
+          </div>
+          <aside className="col-side">
+            <PositionCards positions={positions} selectedId={selectedId} onSelect={setSelectedId} />
+            <CreateStopFlow demoMode={demoMode} onSubmit={onCreate} />
+          </aside>
+          <div className="col-full">
+            <CrossChainTimeline steps={timeline} />
+          </div>
+        </div>
       </main>
       <footer className="site-footer">
-        <p>
-          Parachute · Reactive buildathon — public data only · Base Sepolia Chainlink + Lasna reactive
-        </p>
+        <p>Parachute · Reactive buildathon — public data only · Base Sepolia Chainlink + Lasna reactive</p>
       </footer>
-    </div>
-  );
-}
-
-function MotionHeroGrid(props: {
-  selectedToken: import("./data/demoSeed").TokenSymbol;
-  spot: number;
-  trailPct: number;
-  demoMode: boolean;
-  positions: typeof DEMO_POSITIONS;
-  selectedId: string;
-  onSelect: (id: string) => void;
-  onCreate: (d: CreateStopDraft) => void;
-  timeline: ReturnType<typeof buildDemoTimeline>;
-}) {
-  return (
-    <div className="content-grid">
-      <LivePriceChart
-        token={props.selectedToken}
-        basePrice={props.spot}
-        trailPct={props.trailPct || 5}
-        animated={props.demoMode}
-      />
-      <PositionCards positions={props.positions} selectedId={props.selectedId} onSelect={props.onSelect} />
-      <CreateStopFlow demoMode={props.demoMode} onSubmit={props.onCreate} />
-      <CrossChainTimeline steps={props.timeline} />
     </div>
   );
 }

@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import { ParachuteLogo } from "./ParachuteLogo";
+import { useMotionSafe } from "../lib/motion";
 
 type Props = {
   demoMode: boolean;
@@ -6,8 +8,14 @@ type Props = {
 };
 
 export function Header({ demoMode, onToggleDemo }: Props) {
+  const { reduce } = useMotionSafe();
+
   return (
-    <header className="site-header">
+    <motion.header
+      className="site-header glass header-bar"
+      initial={reduce ? false : { opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
       <ParachuteLogo size={36} />
       <nav className="header-nav" aria-label="Primary">
         <a href="#positions">Positions</a>
@@ -15,15 +23,22 @@ export function Header({ demoMode, onToggleDemo }: Props) {
         <a href="#timeline">Cross-chain</a>
       </nav>
       <MotionToggle demoMode={demoMode} onToggleDemo={onToggleDemo} />
-    </header>
+    </motion.header>
   );
 }
 
 function MotionToggle({ demoMode, onToggleDemo }: Props) {
+  const { reduce } = useMotionSafe();
+
   return (
-    <button type="button" className={`demo-toggle ${demoMode ? "on" : ""}`} onClick={onToggleDemo}>
+    <motion.button
+      type="button"
+      className={`demo-toggle glass-pill ${demoMode ? "on" : ""}`}
+      onClick={onToggleDemo}
+      whileTap={reduce ? {} : { scale: 0.97 }}
+    >
       <span className="demo-dot" />
       {demoMode ? "Demo mode" : "Live prices"}
-    </button>
+    </motion.button>
   );
 }
