@@ -1,83 +1,160 @@
-# Parachute contracts deploy (owner-operated)
+# Parachute deploy (owner-operated, cast keystore)
 
-Scripts read **only** from the environment. This repo does not broadcast; you run commands locally with a funded wallet.
+Scripts use **bare** `vm.startBroadcast()`. You sign with Foundry’s keystore (`--account test`), not a raw key in `.env`.
 
-## Prerequisites
+## Wallet & RPC (WSL)
 
-| Item | Notes |
-| ---- | ----- |
-| Base Sepolia ETH | Pays vault deploy + initial vault funding (`VAULT_FUNDING`) |
-| Lasna **lREACT** | Pays reactive deploy + subscription funding (`REACTIVE_FUNDING`) |
-| `PRIVATE_KEY` | Hot wallet for deploy/connect only (never commit) |
-| Callback proxy | Base Sepolia: `0x476F44b11F5C942c58f4c8E3d0300E5710743585` |
+```bash
+export DEPLOYER="$(cast wallet address --account test)"
+export BASE_SEPOLIA_RPC=https://sepolia.base.org
+export LASNA_RPC=https://lasna-omni-rpc.rnk.dev
+export ETH_CHAIN=84532
+export LASNA_CHAIN=5318007
+```
 
-Supported Chainlink feeds on Base Sepolia (already in `.env.example`):
+Create / unlock the `test` account once with `cast wallet import test` or `cast wallet new test` (password stays in the keystore only).
 
-- ETH/USD `0xa24A68DD788e1D7eb4CA517765CFb2b7e217e7a3`
-- BTC/USD `0x961AD289351459A45fC90884eF3AB0278ea95DDE`
-- LINK/USD `0xAc6DB6d5538Cd07f58afee9dA736ce192119017B`
+## Fund the deployer
 
-Topic monitored: `AnswerUpdated` → `0x0559884fd3a460db3073b7fc896cc77986f16e378210ded43186175bf646fc5f`.
+### Base Sepolia ETH (vault + position gas)
 
-## Setup
+```bash
+cast balance "$DEPLOYER" --rpc-url "$BASE_SEPOLIA_RPC" -e
+```
+
+You need roughly **≥ 0.05 ETH** on Base Sepolia for deploy + ops (vault constructor sends `VAULT_FUNDING`, default **0.01 ETH**, plus gas).
+
+### Lasna lREACT (reactive contract + subscriptions)
+
+Bridge from Base Sepolia: send ETH to **`0x2afaFD298b23b62760711756088F75B7409f5967`** and call `request(address)` with your deployer:
+
+```bash
+cast send 0x2afaFD298b23b62760711756088F75B7409f5967 \
+  "request(address)" "$DEPLOYER" \
+  --value 2ether \
+  --rpc-url "$BASE_SEPOLIA_RPC" \
+  --account test
+```
+
+- **1 ETH → 100 lREACT** (max **5 ETH** per request).
+- Default `REACTIVE_FUNDING` is **2 ETH** of value attached to deploy; use **2–3 ETH** bridge if you want headroom for `coverDebt` / subscriptions.
+
+Check lREACT on Lasna:
+
+```bash
+cast balance "$DEPLOYER" --rpc-url "$LASNA_RPC" -e
+```
+
+## Deploy order (no chicken-and-egg)
+
+| Contract | Constructor needs vault? | Constructor needs reactive? |
+| -------- | ------------------------ | --------------------------- |
+| **SifiReactive** (Lasna) | No — `setVault` is step 3 | — |
+| **SifiVault** (Base Sepolia) | — | **Yes** — immutable callback sender |
+
+So deploy **reactive first**, then **vault** with that Lasna address, then **connect** the watcher.
+
+Use the **same** keystore account (`test`) as reactive **owner** and vault **owner** so step 3 and `OpenParachutePosition` succeed.
+
+Optional: if you prefer vault-first, you can `cast compute-address "$DEPLOYER" --nonce N` on each chain for counterfactual addresses — not required with the order below.
+
+### Setup env file
 
 ```bash
 cd contracts
 cp .env.example .env
-# edit .env — do not commit
-forge install   # if lib/ submodules not initialized at repo root
+# set PARACHUTE_REACTIVE / PARACHUTE_VAULT after each step
+set -a && source .env && set +a
 ```
 
-From repo root, ensure submodules:
+Chainlink feeders (Base Sepolia `AnswerUpdated` emitters) are listed in `.env.example`.  
+Topic: `0x0559884fd3a460db3073b7fc896cc77986f16e378210ded43186175bf646fc5f`.  
+Callback proxy (fixed in vault deploy): `0x476F44b11F5C942c58f4c8E3d0300E5710743585`.
 
-```bash
-git submodule update --init --recursive
-```
+---
 
-## 1 — Vault on Base Sepolia
-
-Deploy **after** you know the Lasna reactive address (set `PARACHUTE_REACTIVE` in `.env`). The vault binds that address at construction.
+### Step 1 — Deploy reactive on Lasna (`5318007`)
 
 ```bash
 cd contracts
-source .env
-forge script script/sifi/DeployParachuteVault.s.sol:DeployParachuteVault \
-  --rpc-url "$BASE_SEPOLIA_RPC" \
-  --broadcast \
-  -vvvv
-```
-
-Record `PARACHUTE_VAULT` from the log.
-
-## 2 — Reactive on Lasna (5318007)
-
-```bash
 forge script script/sifi/DeployParachuteReactive.s.sol:DeployParachuteReactive \
   --rpc-url "$LASNA_RPC" \
+  --chain-id 5318007 \
+  --account test \
+  --sender "$DEPLOYER" \
   --broadcast \
   -vvvv
 ```
 
-Record `PARACHUTE_REACTIVE` and ensure `PARACHUTE_FEEDS` lists the three aggregators.
+Copy `PARACHUTE_REACTIVE` from the log into `.env`.
 
-## 3 — Connect watcher to vault
+---
+
+### Step 2 — Deploy vault on Base Sepolia (`84532`)
+
+Requires `PARACHUTE_REACTIVE` from step 1.
 
 ```bash
-export PARACHUTE_REACTIVE=0x...
-export PARACHUTE_VAULT=0x...
-forge script script/sifi/ConnectParachute.s.sol:ConnectParachute \
-  --rpc-url "$LASNA_RPC" \
+export PARACHUTE_REACTIVE=0x...   # from step 1
+forge script script/sifi/DeployParachuteVault.s.sol:DeployParachuteVault \
+  --rpc-url "$BASE_SEPOLIA_RPC" \
+  --chain-id 84532 \
+  --account test \
+  --sender "$DEPLOYER" \
   --broadcast \
   -vvvv
 ```
 
-This calls `setVault` and subscribes to vault `PositionArmed` / `PositionDisarmed` logs.
+Copy `PARACHUTE_VAULT`. Confirm log `owner` equals `$DEPLOYER`.
 
-## 4 — Arm a position (Base Sepolia)
+---
 
-Use `script/sifi/OpenParachutePosition.s.sol` or call `SifiVault` directly: `open` → `armFixed` or `armTrailing`. The Lasna watcher learns arms from vault events and subscribes to the feed’s `AnswerUpdated` stream.
+### Step 3 — Connect watcher to vault (Lasna)
 
-## Local verification
+Same account must own the reactive contract (`onlyOwner` on `setVault`).
+
+```bash
+export PARACHUTE_VAULT=0x...      # from step 2
+forge script script/sifi/ConnectParachute.s.sol:ConnectParachute \
+  --rpc-url "$LASNA_RPC" \
+  --chain-id 5318007 \
+  --account test \
+  --sender "$DEPLOYER" \
+  --broadcast \
+  -vvvv
+```
+
+Subscribes to vault `PositionArmed` / `PositionDisarmed` and sets callback gas (`CALLBACK_GAS_LIMIT`, default `1000000`).
+
+---
+
+### Step 4 — Open & arm a position (Base Sepolia)
+
+Vault `onlyOwner` — use the same `$DEPLOYER`.
+
+```bash
+export PARACHUTE_VAULT=0x...
+export POSITION_TOKEN=0x...
+export POSITION_AMOUNT=1000000000000000000
+export POSITION_FEED=0xa24A68DD788e1D7eb4CA517765CFb2b7e217e7a3
+export POSITION_SAFE="$DEPLOYER"
+export POSITION_MODE=trailing
+export TRAIL_BPS=500
+
+forge script script/sifi/OpenParachutePosition.s.sol:OpenParachutePosition \
+  --rpc-url "$BASE_SEPOLIA_RPC" \
+  --chain-id 84532 \
+  --account test \
+  --sender "$DEPLOYER" \
+  --broadcast \
+  -vvvv
+```
+
+The Lasna watcher learns the arm from vault events and subscribes to that feed’s `AnswerUpdated` stream.
+
+---
+
+## Local verification (no broadcast)
 
 ```bash
 cd contracts
@@ -85,4 +162,7 @@ forge build
 forge test
 ```
 
-No transactions are sent during CI tests; mocks simulate the Reactive system contract and callback proxy.
+## Security notes
+
+- Vault binds the reactive address at deploy; wrong reactive → redeploy vault.
+- Never commit `.env` or keystore passwords.

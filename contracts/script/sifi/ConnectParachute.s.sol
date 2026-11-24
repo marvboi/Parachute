@@ -15,6 +15,7 @@ contract ConnectParachute is Script {
         reactive.setVault(vault, gasLimit);
         vm.stopBroadcast();
 
+        console.log("deployer", msg.sender);
         console.log("watcher", address(reactive), "-> vault", vault);
     }
 }

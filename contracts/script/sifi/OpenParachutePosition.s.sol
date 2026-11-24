@@ -33,6 +33,8 @@ contract OpenParachutePosition is Script {
         }
         vm.stopBroadcast();
 
+        console.log("vault_owner", SifiVault(payable(address(vault))).owner());
+        console.log("caller", msg.sender);
         console.log("opened position", id);
     }
 }

@@ -25,6 +25,7 @@ contract DeployParachuteReactive is Script {
         }
         vm.stopBroadcast();
 
+        console.log("deployer", msg.sender);
         console.log("PARACHUTE_REACTIVE", address(reactive));
         for (uint256 i; i < feeds.length; ++i) console.log("allowed feed", feeds[i]);
     }

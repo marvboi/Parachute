@@ -19,7 +19,9 @@ contract DeployParachuteVault is Script {
         vault = new SifiVault{value: funding}(IPayable(payable(proxy)), reactive);
         vm.stopBroadcast();
 
+        console.log("deployer", msg.sender);
         console.log("PARACHUTE_VAULT", address(vault));
         console.log("owner", vault.owner());
+        console.log("reactive_callback_sender", reactive);
     }
 }
