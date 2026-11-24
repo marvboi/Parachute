@@ -22,6 +22,7 @@ export function Header({ minimal }: Props) {
           <a href="#positions">Positions</a>
           <a href="#create">Create stop</a>
           <a href="#timeline">Cross-chain</a>
+          <a href="#contracts">Contracts</a>
         </nav>
         <motion.div
           className="header-actions"

@@ -10,6 +10,7 @@ import { StatsStrip } from "./components/StatsStrip";
 import { PackingDeck } from "./components/PackingDeck";
 import { NarrativeBridge } from "./components/NarrativeBridge";
 import { DeckStepNav } from "./components/DeckStepNav";
+import { ContractsSection } from "./components/ContractsSection";
 import { DEFAULT_CHART, buildLiveTimeline, type Position, type TokenSymbol } from "./data/positions";
 import { hasDeployments } from "./config/contracts";
 import { useChainlinkPrices } from "./hooks/useChainlinkPrice";
@@ -157,6 +158,8 @@ export default function App() {
                 <CrossChainTimeline steps={timeline} />
               </div>
             )}
+
+            <ContractsSection />
           </div>
         </div>
       </PackingDeck>

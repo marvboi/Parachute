@@ -320,3 +320,191 @@
 .stats-hint-list li {
   margin-bottom: 4px;
 }
+
+.deck-step-link-plain {
+  padding-left: 14px;
+}
+
+.contracts-panel {
+  margin-top: 8px;
+}
+
+.contracts-panel .panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.contract-lead {
+  margin: 4px 0 0;
+  font-size: 0.86rem;
+}
+
+.contract-github {
+  text-decoration: none;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.contract-cards {
+  display: grid;
+  gap: 14px;
+}
+
+.contract-card {
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.contract-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contract-card-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.contract-card-name {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.chain-badge {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border: 1px solid rgba(20, 22, 28, 0.12);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.chain-badge-dim {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.verified-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.verified-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1a7a52;
+}
+
+.contract-addr-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.contract-addr {
+  font-size: 0.88rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.copy-addr-btn {
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 22, 28, 0.14);
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
+.copy-addr-btn:hover {
+  border-color: rgba(255, 91, 31, 0.4);
+}
+
+.contract-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.84rem;
+}
+
+.contract-links a:not(.verified-pill) {
+  color: var(--muted, #5c6478);
+  text-decoration: none;
+}
+
+.contract-links a:not(.verified-pill):hover {
+  color: var(--text, #14161c);
+}
+
+.contract-code-expand {
+  margin-top: 10px;
+}
+
+.solidity-block {
+  margin: 8px 0 0;
+  padding: 12px 10px;
+  border-radius: 10px;
+  background: #0f1116;
+  color: #e2e6ef;
+  font-family: "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  overflow-x: auto;
+  max-height: min(340px, 50vh);
+  overflow-y: auto;
+}
+
+.solidity-line {
+  display: flex;
+  gap: 10px;
+  white-space: pre;
+}
+
+.sol-ln {
+  flex-shrink: 0;
+  width: 2ch;
+  text-align: right;
+  color: #5c6478;
+  user-select: none;
+  opacity: 0.7;
+}
+
+.sol-kw {
+  color: #c792ea;
+}
+
+.sol-type {
+  color: #ffcb6b;
+}
+
+.sol-str {
+  color: #c3e88d;
+}
+
+.sol-cmt {
+  color: #676e95;
+  font-style: italic;
+}
+
+.sol-num {
+  color: #f78c6c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expandable-panel:not(.reduce-motion) {
+    transition: none;
+  }
+}

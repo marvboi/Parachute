@@ -28,15 +28,40 @@ export function explorerAddress(explorer: keyof typeof EXPLORERS, address: strin
   return `${EXPLORERS[explorer]}/address/${address}`;
 }
 
-export const contractVerification = {
-  vault: {
-    address: contracts.vault,
-    verifiedUrl: `${EXPLORERS.baseSepolia}/address/${contracts.vault}#code`,
-    verifiedLabel: "Etherscan (Base Sepolia)",
-  },
+/** Set when public repo URL is available; hide “View source on GitHub” when empty. */
+export const GITHUB_CONTRACTS_SOURCE_URL = "";
+
+export const DEPLOYED_CONTRACTS = {
   reactive: {
+    name: "SifiReactive",
     address: contracts.reactive,
+    chainId: CHAIN_LASNA,
+    chainLabel: "Lasna",
+    explorerUrl: `${EXPLORERS.lasna}/address/${contracts.reactive}`,
     verifiedUrl: `https://repo.sourcify.dev/contracts/full_match/${CHAIN_LASNA}/${contracts.reactive.toLowerCase()}/`,
     verifiedLabel: "Sourcify",
+  },
+  vault: {
+    name: "SifiVault",
+    address: contracts.vault,
+    chainId: CHAIN_BASE_SEPOLIA,
+    chainLabel: "Base Sepolia",
+    explorerUrl: `${EXPLORERS.baseSepolia}/address/${contracts.vault}`,
+    verifiedUrl: `${EXPLORERS.baseSepolia}/address/${contracts.vault}#code`,
+    verifiedLabel: "Etherscan",
+  },
+} as const;
+
+/** @deprecated use DEPLOYED_CONTRACTS */
+export const contractVerification = {
+  vault: {
+    address: DEPLOYED_CONTRACTS.vault.address,
+    verifiedUrl: DEPLOYED_CONTRACTS.vault.verifiedUrl,
+    verifiedLabel: DEPLOYED_CONTRACTS.vault.verifiedLabel,
+  },
+  reactive: {
+    address: DEPLOYED_CONTRACTS.reactive.address,
+    verifiedUrl: DEPLOYED_CONTRACTS.reactive.verifiedUrl,
+    verifiedLabel: DEPLOYED_CONTRACTS.reactive.verifiedLabel,
   },
 } as const;
