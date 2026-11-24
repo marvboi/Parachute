@@ -1,4 +1,4 @@
-import type { TokenSymbol } from "../data/demoSeed";
+import type { TokenSymbol } from "../data/positions";
 
 const META: Record<TokenSymbol, { gradient: [string, string]; glyph: string }> = {
   ETH: { gradient: ["#627eea", "#3d5afe"], glyph: "Ξ" },

@@ -21,7 +21,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 type Props = {
   ethSpot: number;
-  demoMode: boolean;
   onReachApp: () => void;
 };
 
@@ -43,7 +42,7 @@ declare global {
   }
 }
 
-export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
+export function FallNarrative({ ethSpot, onReachApp }: Props) {
   const { reduce: reducePref } = useMotionSafe();
   const reduce = reducePref && !window.__PARACHUTE_FORCE_MOTION__;
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -162,7 +161,7 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
     return (
       <section className="fall-fallback" aria-label="Story preview" data-scene={SCENE_NAMES[staticScene]}>
         <div className="fall-split">
-          <PhaseCopy scene={staticScene} demoMode={demoMode} savedDemo={savedDemo} price={priceDisplay} />
+          <PhaseCopy scene={staticScene} savedDemo={savedDemo} price={priceDisplay} />
           <div className="fall-visual-panel">
             <svg viewBox={`0 0 ${W} ${H}`} className="fall-svg">
               <FallSvgLayer
@@ -215,14 +214,13 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
           <span className="fall-alt-label">ALT</span>
           <span className="fall-alt-value">${priceDisplay.toFixed(2)}</span>
           <span className="fall-alt-sub">
-            ETH/USD · <span className="fall-alt-mode">{demoMode ? "demo" : "live"}</span>
+            ETH/USD · <span className="fall-alt-mode">live</span>
           </span>
         </div>
 
         <div className="fall-split">
           <PhaseCopy
             scene={scene}
-            demoMode={demoMode}
             savedDemo={savedDemo}
             price={priceDisplay}
             fundsSaved={scene === 4 ? Math.floor(savedDemo * (0.35 + t * 0.65)) : undefined}
@@ -277,13 +275,11 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
 function PhaseCopy({
   scene,
   price,
-  demoMode,
   savedDemo,
   fundsSaved,
 }: {
   scene: number;
   price: number;
-  demoMode: boolean;
   savedDemo?: number;
   fundsSaved?: number;
 }) {
@@ -302,7 +298,7 @@ function PhaseCopy({
             callbacks your vault before the dip becomes a crash.
           </p>
           <p className="fall-live tabular">
-            ETH/USD ${price.toFixed(2)} <span className="fall-alt-mode-inline">{demoMode ? "· demo" : "· live"}</span>
+            ETH/USD ${price.toFixed(2)} <span className="fall-alt-mode-inline">· live</span>
           </p>
         </>
       )}
@@ -315,8 +311,7 @@ function PhaseCopy({
           <p className="fall-ground-label">stable ground · ${price.toFixed(0)}</p>
           {fundsSaved !== undefined && (
             <p className="fall-saved fall-saved-inline tabular">
-              Example: funds saved <strong>${fundsSaved.toLocaleString()}</strong>{" "}
-              <span className="demo-tag">(demo)</span>
+              Example: funds saved <strong>${fundsSaved.toLocaleString()}</strong>
             </p>
           )}
         </>

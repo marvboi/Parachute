@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createPublicClient, http, parseAbi } from "viem";
 import { baseSepolia } from "viem/chains";
 import { BASE_SEPOLIA_RPC } from "../config/contracts";
-import type { TokenSymbol } from "../data/demoSeed";
+import type { TokenSymbol } from "../data/positions";
 
 const aggregatorAbi = parseAbi([
   "function latestRoundData() view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)",

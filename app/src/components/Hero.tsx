@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import type { TokenSymbol } from "../data/demoSeed";
+import type { TokenSymbol } from "../data/positions";
 import { useMotionSafe } from "../lib/motion";
 import { HeroVisual } from "./HeroVisual";
 

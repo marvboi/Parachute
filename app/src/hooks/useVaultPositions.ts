@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createPublicClient, formatUnits, http, parseAbi, type Address } from "viem";
 import { baseSepolia } from "viem/chains";
 import { BASE_SEPOLIA_RPC, contracts, hasDeployments } from "../config/contracts";
-import type { Position, PositionStatus } from "../data/demoSeed";
+import type { Position, PositionStatus } from "../data/positions";
 import { tokenFromFeed, trailStopUsd } from "../lib/tokenMap";
 import { MODE_FIXED, MODE_TRAILING, VAULT_STATUS, vaultAbi } from "../lib/vaultAbi";
 

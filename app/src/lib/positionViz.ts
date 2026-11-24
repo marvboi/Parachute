@@ -1,4 +1,4 @@
-import type { Position } from "../data/demoSeed";
+import type { Position } from "../data/positions";
 
 export type MiniViz = {
   pricePath: string;

@@ -1,29 +1,31 @@
 import { motion } from "framer-motion";
 import { useMotionSafe } from "../lib/motion";
-import type { Position } from "../data/demoSeed";
+import type { Position } from "../data/positions";
 
 type Props = {
   positions: Position[];
-  demoMode: boolean;
 };
 
-/** Demo-labeled aggregate stats — shown only in demo mode */
-export function StatsStrip({ positions, demoMode }: Props) {
+export function StatsStrip({ positions }: Props) {
   const { tween, stagger, reduce } = useMotionSafe();
-  if (!demoMode) return null;
-
-  const tvlDemo = 4.2;
-  const reactionMs = 1180;
+  const armed = positions.filter((p) => p.status === "armed").length;
+  const notional = positions.reduce((sum, p) => {
+    const px = p.liveSpot ?? 0;
+    return sum + p.amount * (p.token === "ETH" ? px : p.token === "BTC" ? px : px);
+  }, 0);
 
   const items = [
-    { label: "TVL", value: `$${tvlDemo.toFixed(1)}M`, hint: "Demo vault notional" },
     { label: "Positions protected", value: String(positions.length), hint: "Active in vault" },
-    { label: "Avg reaction time", value: `${(reactionMs / 1000).toFixed(1)}s`, hint: "Lasna → callback (demo)" },
+    { label: "Armed stops", value: String(armed), hint: "Reactive watching" },
+    {
+      label: "Notional (USD est.)",
+      value: notional > 0 ? `$${notional.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—",
+      hint: "Spot × position size",
+    },
   ];
 
   return (
-    <section className="stats-strip" aria-label="Demo statistics">
-      <span className="stats-strip-badge">Demo metrics</span>
+    <section className="stats-strip" aria-label="Vault statistics">
       <div className="stats-strip-grid">
         {items.map((item, i) => (
           <motion.div

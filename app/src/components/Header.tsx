@@ -4,12 +4,10 @@ import { WalletConnect } from "./WalletConnect";
 import { useMotionSafe } from "../lib/motion";
 
 type Props = {
-  demoMode: boolean;
-  onToggleDemo: () => void;
   minimal?: boolean;
 };
 
-export function Header({ demoMode, onToggleDemo, minimal }: Props) {
+export function Header({ minimal }: Props) {
   const { reduce } = useMotionSafe();
 
   return (
@@ -25,27 +23,15 @@ export function Header({ demoMode, onToggleDemo, minimal }: Props) {
           <a href="#create">Create stop</a>
           <a href="#timeline">Cross-chain</a>
         </nav>
-        <div className="header-actions">
+        <motion.div
+          className="header-actions"
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.05 }}
+        >
           <WalletConnect />
-          <MotionToggle demoMode={demoMode} onToggleDemo={onToggleDemo} />
-        </div>
+        </motion.div>
       </div>
     </motion.header>
-  );
-}
-
-function MotionToggle({ demoMode, onToggleDemo }: Props) {
-  const { reduce } = useMotionSafe();
-
-  return (
-    <motion.button
-      type="button"
-      className={`demo-toggle glass-pill ${demoMode ? "on" : ""}`}
-      onClick={onToggleDemo}
-      whileTap={reduce ? {} : { scale: 0.97 }}
-    >
-      <span className="demo-dot" />
-      {demoMode ? "Demo mode" : "Live prices"}
-    </motion.button>
   );
 }

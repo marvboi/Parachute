@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { EXPLORERS } from "../config/contracts";
-import type { TimelineStep } from "../data/demoSeed";
+import type { TimelineStep } from "../data/positions";
 import { useMotionSafe } from "../lib/motion";
 
 type Props = { steps: TimelineStep[]; compact?: boolean };

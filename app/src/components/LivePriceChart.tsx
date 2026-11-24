@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import type { TokenSymbol } from "../data/demoSeed";
-import { buildPriceSeries } from "../data/demoSeed";
+import type { TokenSymbol } from "../data/positions";
+import { buildPriceSeries } from "../data/positions";
 import { useMotionSafe } from "../lib/motion";
 
 type Props = {

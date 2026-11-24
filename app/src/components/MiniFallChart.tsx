@@ -1,15 +1,16 @@
 import { useMemo } from "react";
-import type { TokenSymbol } from "../data/demoSeed";
-import { PROOF_PRICES, buildPriceSeries } from "../data/demoSeed";
+import type { TokenSymbol } from "../data/positions";
+import { DEFAULT_CHART, buildPriceSeries } from "../data/positions";
 
 type Props = {
   token: TokenSymbol;
   trailPct: number;
   height?: number;
+  spotPrice?: number;
 };
 
-export function MiniFallChart({ token, trailPct, height = 120 }: Props) {
-  const base = PROOF_PRICES[token];
+export function MiniFallChart({ token, trailPct, height = 120, spotPrice }: Props) {
+  const base = spotPrice ?? DEFAULT_CHART[token];
   const series = useMemo(() => buildPriceSeries(base, 32), [base]);
   const high = Math.max(...series);
   const trigger = high * (1 - trailPct / 100);
@@ -35,8 +36,9 @@ export function MiniFallChart({ token, trailPct, height = 120 }: Props) {
   );
 }
 
-export function triggerPricePreview(token: TokenSymbol, trailPct: number): number {
-  const series = buildPriceSeries(PROOF_PRICES[token], 32);
+export function triggerPricePreview(token: TokenSymbol, trailPct: number, spotPrice?: number): number {
+  const base = spotPrice ?? DEFAULT_CHART[token];
+  const series = buildPriceSeries(base, 32);
   const high = Math.max(...series);
   return high * (1 - trailPct / 100);
 }

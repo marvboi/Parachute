@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Address } from "viem";
-import type { TokenSymbol } from "../data/demoSeed";
+import type { TokenSymbol } from "../data/positions";
+import { DEFAULT_CHART } from "../data/positions";
+import { useChainlinkPrices } from "../hooks/useChainlinkPrice";
 import { useMotionSafe } from "../lib/motion";
 import { Capsule } from "../fall/svg/Capsule";
 import { MiniFallChart, triggerPricePreview } from "./MiniFallChart";
@@ -18,13 +20,12 @@ export type CreateStopDraft = {
 };
 
 type Props = {
-  demoMode: boolean;
-  onSubmit: (draft: CreateStopDraft) => void;
   onLandingMode: (swapToStable: boolean) => void;
   armedCount?: number;
   onChainReady?: boolean;
   isVaultOwner?: boolean;
   connectedAddress?: Address;
+  spotPrice?: number;
   onVaultRefresh?: () => void;
 };
 
@@ -32,13 +33,12 @@ const TOKENS: TokenSymbol[] = ["ETH", "BTC", "LINK"];
 const HOLD_MS = 800;
 
 export function CreateStopFlow({
-  demoMode,
-  onSubmit,
   onLandingMode,
   armedCount = 0,
   onChainReady = false,
   isVaultOwner = false,
   connectedAddress,
+  spotPrice,
   onVaultRefresh,
 }: Props) {
   const [draft, setDraft] = useState<CreateStopDraft>({
@@ -56,8 +56,14 @@ export function CreateStopFlow({
   const holdTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdStart = useRef(0);
   const { reduce } = useMotionSafe();
+  const live = useChainlinkPrices(TOKENS, true);
+  const draftSpot = spotPrice ?? live.data?.[draft.token]?.price ?? DEFAULT_CHART[draft.token];
   const trailNum = Number(draft.trailPct) || 5;
-  const triggerAt = triggerPricePreview(draft.token, draft.stopType === "trailing" ? trailNum : 10);
+  const triggerAt = triggerPricePreview(
+    draft.token,
+    draft.stopType === "trailing" ? trailNum : 10,
+    draftSpot,
+  );
 
   const canOnChain = onChainReady && isVaultOwner && !!connectedAddress;
 
@@ -82,20 +88,16 @@ export function CreateStopFlow({
   const finishArm = useCallback(async () => {
     if (holdTimer.current) clearInterval(holdTimer.current);
     setHoldProgress(0);
-    if (canOnChain) {
-      try {
-        await run(draft, wrapEth && draft.token === "ETH");
-      } catch {
-        return;
-      }
-    } else if (demoMode || !onChainReady) {
-      onSubmit(draft);
-      setArmed(true);
+    if (!canOnChain) return;
+    try {
+      await run(draft, wrapEth && draft.token === "ETH");
+    } catch {
+      return;
     }
-  }, [canOnChain, demoMode, onChainReady, run, draft, wrapEth, onSubmit]);
+  }, [canOnChain, run, draft, wrapEth]);
 
   const startHold = () => {
-    if (onChainReady && !isVaultOwner && !demoMode) return;
+    if (!canOnChain) return;
     if (reduce) {
       void finishArm();
       return;
@@ -114,15 +116,17 @@ export function CreateStopFlow({
   };
 
   const landingMode = draft.swapToStable ? "swap" : "withdraw";
-  const armDisabled = onChainReady && !isVaultOwner;
+  const armDisabled = !canOnChain;
 
   const holdLabel = armed
     ? "Armed, watching"
     : canOnChain
       ? "Arm stop on vault"
-      : demoMode
-        ? "Simulate arm stop"
-        : "Arm stop (requires deploy)";
+      : !onChainReady
+        ? "Vault not configured"
+        : !connectedAddress
+          ? "Connect wallet"
+          : "Vault owner only";
 
   return (
     <section id="create" className="panel panel-app create-panel">
@@ -135,7 +139,7 @@ export function CreateStopFlow({
           <Capsule x={40} y={24} tokenGlyph={draft.token.slice(0, 1)} />
         </svg>
       </header>
-      {onChainReady && !isVaultOwner && (
+      {onChainReady && connectedAddress && !isVaultOwner && (
         <p className="form-note vault-readonly" role="status">
           This vault is read-only for your wallet. Only the vault owner can open or arm positions.
         </p>
@@ -192,10 +196,9 @@ export function CreateStopFlow({
         {draft.stopType === "trailing" && (
           <div className="trail-vertical-block">
             <div className="trail-chart-wrap">
-              <MiniFallChart token={draft.token} trailPct={trailNum} />
+              <MiniFallChart token={draft.token} trailPct={trailNum} spotPrice={draftSpot} />
               <p className="trigger-preview tabular">
-                Would have triggered at ${triggerAt.toFixed(2)}{" "}
-                <span className="demo-tag">(example)</span>
+                Preview trigger near ${triggerAt.toFixed(2)} <span className="muted">(at {trailNum}% trail)</span>
               </p>
             </div>
             <div className="trail-slider-vertical">
@@ -261,7 +264,14 @@ export function CreateStopFlow({
           <button
             type="button"
             className={`btn-arm-hold ${armed ? "armed" : ""}`}
-            disabled={armDisabled || state.phase === "pending" || state.phase === "wrap" || state.phase === "approve" || state.phase === "open" || state.phase === "arm"}
+            disabled={
+              armDisabled ||
+              state.phase === "pending" ||
+              state.phase === "wrap" ||
+              state.phase === "approve" ||
+              state.phase === "open" ||
+              state.phase === "arm"
+            }
             onPointerDown={startHold}
             onPointerUp={cancelHold}
             onPointerLeave={cancelHold}
@@ -275,11 +285,6 @@ export function CreateStopFlow({
           </button>
           {armed && <div className="armed-pulse" aria-live="polite" />}
         </div>
-        {armed && !canOnChain && (demoMode || !onChainReady) && (
-          <p className="form-note mint" role="status">
-            Stop configuration staged locally — demo timeline updated.
-          </p>
-        )}
         {state.phase === "cancelled" && (
           <p className="form-note" role="alert">
             Cancelled in wallet ·{" "}

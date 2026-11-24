@@ -295,17 +295,6 @@ body,
 }
 
 .glass-pill,
-.demo-toggle {
-  background: var(--bg-paper) !important;
-  border: 1px solid var(--rule-hair) !important;
-  color: var(--ink) !important;
-}
-
-.demo-toggle.on {
-  border-color: var(--chute) !important;
-  box-shadow: none !important;
-}
-
 .muted {
   color: var(--ink-secondary) !important;
 }
@@ -653,14 +642,6 @@ body,
 .token-option,
 .segment,
 .wallet-btn,
-.demo-toggle {
-  transition:
-    border-color var(--motion-fast),
-    box-shadow var(--motion-fast),
-    background var(--motion-fast),
-    transform var(--motion-fast),
-    color var(--motion-fast);
-}
 
 @media (hover: hover) {
   .capsule-position:hover:not(.active) {
@@ -692,7 +673,6 @@ body,
 .token-option:active,
 .segment:active,
 .wallet-btn:active,
-.demo-toggle:active,
 .btn-arm-hold:active {
   transform: scale(0.985);
 }
@@ -700,7 +680,6 @@ body,
 .btn-arm-hold:focus-visible,
 .token-option:focus-visible,
 .wallet-btn:focus-visible,
-.demo-toggle:focus-visible,
 .capsule-position:focus-visible {
   outline: 2px solid rgba(255, 91, 31, 0.55);
   outline-offset: 2px;
@@ -768,12 +747,6 @@ body,
     justify-content: flex-start;
     gap: 14px;
     flex-wrap: wrap;
-  }
-
-  .demo-toggle {
-    margin-left: auto;
-    font-size: 0.78rem;
-    padding: 6px 10px;
   }
 
   .fall-altimeter {
@@ -848,11 +821,6 @@ body,
   .wallet-btn {
     font-size: 0.7rem;
     padding: 0.3rem 0.55rem;
-  }
-
-  .demo-toggle {
-    font-size: 0.72rem !important;
-    padding: 5px 8px !important;
   }
 
   .fall-h1 {

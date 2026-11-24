@@ -1,5 +1,5 @@
 import { contracts, WETH_BASE_SEPOLIA } from "../config/contracts";
-import type { TokenSymbol } from "../data/demoSeed";
+import type { TokenSymbol } from "../data/positions";
 
 export const FEED_BY_TOKEN: Record<TokenSymbol, `0x${string}`> = {
   ETH: contracts.ethUsdFeed,

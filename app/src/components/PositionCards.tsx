@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import type { Position } from "../data/demoSeed";
-import { PROOF_PRICES, buildDemoTimeline, buildLiveTimeline } from "../data/demoSeed";
+import type { Position } from "../data/positions";
+import { DEFAULT_CHART, buildLiveTimeline } from "../data/positions";
 import { buildPositionMiniViz } from "../lib/positionViz";
 import { contracts, explorerAddress } from "../config/contracts";
 import { useMotionSafe } from "../lib/motion";
@@ -8,30 +8,37 @@ import { CrossChainTimeline } from "./CrossChainTimeline";
 import { TokenIcon } from "./TokenIcon";
 import { Capsule } from "../fall/svg/Capsule";
 
+export type VaultPositionsStatus = "loading" | "ready" | "empty" | "error";
+
 type Props = {
   positions: Position[];
   onSelect: (id: string) => void;
   selectedId: string;
-  liveSource?: boolean;
+  status: VaultPositionsStatus;
+  onRetry?: () => void;
 };
 
+function spotFor(position: Position): number {
+  return position.liveSpot ?? DEFAULT_CHART[position.token];
+}
+
 function triggerDistance(position: Position): number {
-  const spot = position.liveSpot ?? PROOF_PRICES[position.token];
+  const spot = spotFor(position);
   const dist = spot - position.stopLevel;
-  const range = position.highWater - position.stopLevel;
+  const range = Math.max(position.highWater - position.stopLevel, 1);
   return Math.min(100, Math.max(8, 100 - (dist / range) * 100));
 }
 
 const intensity = (d: number) => `rgba(255, 91, 31, ${0.25 + (d / 100) * 0.65})`;
 
-export function PositionCards({ positions, onSelect, selectedId, liveSource }: Props) {
+export function PositionCards({ positions, onSelect, selectedId, status, onRetry }: Props) {
   return (
     <section id="positions" className="panel panel-app positions-panel">
       <header className="panel-head">
         <div>
           <h2>Protected positions</h2>
           <p className="muted">Multi-token vault · fixed or trailing stops</p>
-          {liveSource && (
+          {status === "ready" && (
             <p className="onchain-links muted">
               <a href={explorerAddress("baseSepolia", contracts.vault)} target="_blank" rel="noreferrer">
                 Vault
@@ -44,18 +51,60 @@ export function PositionCards({ positions, onSelect, selectedId, liveSource }: P
           )}
         </div>
       </header>
-      <div className="capsule-positions">
-        {positions.map((p, i) => (
-          <CapsulePositionCard
-            key={p.id}
-            position={p}
-            active={p.id === selectedId}
-            index={i}
-            onSelect={() => onSelect(p.id)}
-          />
-        ))}
-      </div>
+      {status === "loading" && (
+        <SearchState title="Loading vault positions…" detail="Reading SifiVault on Base Sepolia" />
+      )}
+      {status === "error" && (
+        <SearchState
+          title="Couldn't load positions"
+          detail="RPC or contract call failed. Check network and try again."
+          action={
+            onRetry ? (
+              <button type="button" className="btn-secondary" onClick={onRetry}>
+                Retry
+              </button>
+            ) : undefined
+          }
+        />
+      )}
+      {status === "empty" && (
+        <SearchState
+          title="No positions yet"
+          detail="The vault has no active stops. Connect as the vault owner and arm a stop below."
+        />
+      )}
+      {status === "ready" && (
+        <div className="capsule-positions">
+          {positions.map((p, i) => (
+            <CapsulePositionCard
+              key={p.id}
+              position={p}
+              active={p.id === selectedId}
+              index={i}
+              onSelect={() => onSelect(p.id)}
+            />
+          ))}
+        </div>
+      )}
     </section>
+  );
+}
+
+function SearchState({
+  title,
+  detail,
+  action,
+}: {
+  title: string;
+  detail: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="vault-empty-state" role="status">
+      <h3 className="vault-empty-title">{title}</h3>
+      <p className="muted vault-empty-detail">{detail}</p>
+      {action}
+    </div>
   );
 }
 
@@ -72,9 +121,9 @@ function CapsulePositionCard({
 }) {
   const { tween, stagger, reduce } = useMotionSafe();
   const dist = triggerDistance(position);
-  const spot = position.liveSpot ?? PROOF_PRICES[position.token];
+  const spot = spotFor(position);
   const viz = buildPositionMiniViz(position, spot);
-  const showTimeline = position.status === "triggered" || (position.onChain && position.status === "armed");
+  const showTimeline = position.status === "triggered" || position.status === "armed";
   const armed = position.status === "armed";
 
   return (
@@ -158,14 +207,7 @@ function CapsulePositionCard({
       </p>
       {showTimeline && (
         <div className="pos-trigger-timeline">
-          <CrossChainTimeline
-            steps={
-              position.onChain
-                ? buildLiveTimeline(position.token, position.vaultId)
-                : buildDemoTimeline(position.token)
-            }
-            compact
-          />
+          <CrossChainTimeline steps={buildLiveTimeline(position.token, position.vaultId)} compact />
         </div>
       )}
     </motion.article>
