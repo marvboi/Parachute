@@ -2,12 +2,12 @@ import { motion, useSpring, useMotionValueEvent } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useMotionSafe } from "../lib/motion";
 
-type Props = { x: number; y: number; open: number };
+type Props = { x: number; y: number; open: number; scene?: number };
 
 const DEPLOY_SPRING = { stiffness: 340, damping: 15, mass: 0.55 };
 
 /** Canopy with spring snap on deploy (scroll trigger + intro). */
-export function SpringCanopy({ x, y, open }: Props) {
+export function SpringCanopy({ x, y, open, scene = 0 }: Props) {
   const { reduce } = useMotionSafe();
   const springOpen = useSpring(open, reduce ? { duration: 0.01 } : DEPLOY_SPRING);
   const [o, setO] = useState(reduce ? open : 0);
@@ -18,7 +18,8 @@ export function SpringCanopy({ x, y, open }: Props) {
 
   useMotionValueEvent(springOpen, "change", (v) => setO(v));
 
-  const spread = 8 + o * 42;
+  const scaleBoost = scene === 3 && o > 0.15 ? 2.45 : scene >= 4 ? 1.1 : 1;
+  const spread = (8 + o * 42) * scaleBoost;
   const lift = o * -28;
   const lineReach = 6 + o * 16;
   const wobble = reduce ? 0 : Math.sin(o * Math.PI) * 2;

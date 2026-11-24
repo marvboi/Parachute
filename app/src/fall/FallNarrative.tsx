@@ -3,7 +3,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackgroundParachuteDrops } from "../components/BackgroundParachuteDrops";
 import { HoverLandParachute } from "../components/HoverLandParachute";
-import { HeroIntroDrop } from "./HeroIntroDrop";
+import { HeroIntroOverlay } from "./HeroIntroOverlay";
 import { useMotionSafe } from "../lib/motion";
 import {
   buildAltitudePath,
@@ -37,9 +37,17 @@ function localT(progress: number): number {
   return p - Math.floor(p);
 }
 
+declare global {
+  interface Window {
+    __PARACHUTE_FORCE_MOTION__?: boolean;
+  }
+}
+
 export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
-  const { reduce } = useMotionSafe();
+  const { reduce: reducePref } = useMotionSafe();
+  const reduce = reducePref && !window.__PARACHUTE_FORCE_MOTION__;
   const wrapRef = useRef<HTMLDivElement>(null);
+  const [visualPanelEl, setVisualPanelEl] = useState<HTMLDivElement | null>(null);
   const [progress, setProgress] = useState(0);
   const [staticScene, setStaticScene] = useState(0);
 
@@ -62,7 +70,7 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
 
   const [ctaHover, setCtaHover] = useState(false);
   const [narrativeExited, setNarrativeExited] = useState(false);
-  const [heroIntroDone, setHeroIntroDone] = useState(reduce);
+  const [heroIntroDone, setHeroIntroDone] = useState(() => reduce);
   const showScrollCta = scene === 6 && progress < 0.93 && !narrativeExited;
   const showHeroIntro = scene === 0 && !heroIntroDone;
 
@@ -146,7 +154,6 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
     scene,
     sceneT: t,
     showHeroIntro,
-    onHeroIntroDone: () => setHeroIntroDone(true),
   };
 
   if (reduce) {
@@ -202,8 +209,8 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
       <div className={`fall-pin ${skyScene ? "fall-sky" : ""} ${narrativeExited ? "fall-pin-exited" : ""}`}>
         <div className="fall-grain" aria-hidden />
         <div className="fall-cloud-drift" aria-hidden />
-        <BackgroundParachuteDrops enabled={scene === 0 && heroIntroDone} variant="hero" />
-        {scene === 4 && <BackgroundParachuteDrops enabled variant="landing" />}
+        <BackgroundParachuteDrops storyActive={scene < 6 && !narrativeExited} variant="hero" />
+        {scene === 4 && <BackgroundParachuteDrops storyActive variant="landing" />}
         <div className="fall-altimeter tabular" aria-live="polite">
           <span className="fall-alt-label">ALT</span>
           <span className="fall-alt-value">${priceDisplay.toFixed(2)}</span>
@@ -220,7 +227,18 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
             price={priceDisplay}
             fundsSaved={scene === 4 ? Math.floor(savedDemo * (0.35 + t * 0.65)) : undefined}
           />
-          <div className="fall-visual-panel">
+          <div className="fall-visual-panel" ref={setVisualPanelEl}>
+            {showHeroIntro && (
+              <HeroIntroOverlay
+                active
+                panelEl={visualPanelEl}
+                capX={capX}
+                capY={capY}
+                viewW={W}
+                viewH={H}
+                onComplete={() => setHeroIntroDone(true)}
+              />
+            )}
             <div className="fall-stage" style={{ transform: `rotate(${tilt}deg)` }}>
               <svg viewBox={`0 0 ${W} ${H}`} className="fall-svg" role="img" aria-label="Price path and capsule">
                 <FallSvgLayer {...visualProps} />
@@ -326,7 +344,6 @@ function FallSvgLayer({
   scene,
   sceneT,
   showHeroIntro,
-  onHeroIntroDone,
 }: {
   W: number;
   H: number;
@@ -345,7 +362,6 @@ function FallSvgLayer({
   scene: number;
   sceneT: number;
   showHeroIntro?: boolean;
-  onHeroIntroDone?: () => void;
 }) {
   const stableY = H * 0.8;
   const touchdown = scene === 4;
@@ -449,12 +465,9 @@ function FallSvgLayer({
           )}
         </>
       )}
-      {showHeroIntro && onHeroIntroDone && (
-        <HeroIntroDrop targetX={capX} targetY={capY} onComplete={onHeroIntroDone} />
-      )}
       {!showHeroIntro && (
         <>
-          <SpringCanopy x={capX} y={capY + bounceY - 10} open={collapseOpen} />
+          <SpringCanopy x={capX} y={capY + bounceY - 10} open={collapseOpen} scene={scene} />
           <Capsule x={capX} y={capY + bounceY} scale={1.15} />
         </>
       )}
