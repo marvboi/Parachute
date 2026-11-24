@@ -5,7 +5,7 @@ import { join } from "path";
 const ARTIFACTS = "/opt/cursor/artifacts";
 const OUT = join(ARTIFACTS, "parachute-motion.webm");
 const VIEWPORT = { width: 1280, height: 800 };
-const HERO_HOLD_MS = 4000;
+const HERO_HOLD_MS = 5000;
 const SCROLL_MS = 10500;
 const SCROLL_TARGET = 0.9;
 
@@ -19,7 +19,7 @@ const context = await browser.newContext({
 });
 const page = await context.newPage();
 
-await page.goto("http://127.0.0.1:4173/", { waitUntil: "networkidle" });
+await page.goto("http://127.0.0.1:4173/", { waitUntil: "networkidle", cache: "no-cache" });
 await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
 await page.waitForTimeout(HERO_HOLD_MS);
 

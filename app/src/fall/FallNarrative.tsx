@@ -1,7 +1,9 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { DriftingParachutes, HoverLandParachute } from "../components/DriftingParachutes";
+import { BackgroundParachuteDrops } from "../components/BackgroundParachuteDrops";
+import { HoverLandParachute } from "../components/HoverLandParachute";
+import { HeroIntroDrop } from "./HeroIntroDrop";
 import { useMotionSafe } from "../lib/motion";
 import {
   buildAltitudePath,
@@ -11,8 +13,9 @@ import {
   tetherLengthPx,
 } from "./fallPaths";
 import { HowItWorksRail } from "./HowItWorksRail";
-import { Canopy } from "./svg/Canopy";
 import { Capsule } from "./svg/Capsule";
+import { SpringCanopy } from "./SpringCanopy";
+import { motion } from "framer-motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -59,7 +62,13 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
 
   const [ctaHover, setCtaHover] = useState(false);
   const [narrativeExited, setNarrativeExited] = useState(false);
+  const [heroIntroDone, setHeroIntroDone] = useState(reduce);
   const showScrollCta = scene === 6 && progress < 0.93 && !narrativeExited;
+  const showHeroIntro = scene === 0 && !heroIntroDone;
+
+  useEffect(() => {
+    if (scene > 0) setHeroIntroDone(true);
+  }, [scene]);
 
   const trailPct = 5;
   const ratchet = scene >= 2 ? Math.min(1, (scene - 2 + t * 0.85) / 1.8) : 0;
@@ -134,6 +143,10 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
     trailPct,
     showTrailLabel,
     ratchetNotches: Math.floor(ratchet * 6),
+    scene,
+    sceneT: t,
+    showHeroIntro,
+    onHeroIntroDone: () => setHeroIntroDone(true),
   };
 
   if (reduce) {
@@ -157,6 +170,9 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
                 streaks={staticScene === 1}
                 showTrailLabel={staticScene >= 2}
                 ratchetNotches={4}
+                scene={staticScene}
+                sceneT={0.55}
+                showHeroIntro={false}
               />
             </svg>
           </div>
@@ -186,9 +202,8 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
       <div className={`fall-pin ${skyScene ? "fall-sky" : ""} ${narrativeExited ? "fall-pin-exited" : ""}`}>
         <div className="fall-grain" aria-hidden />
         <div className="fall-cloud-drift" aria-hidden />
-        <DriftingParachutes zone="hero" />
-        {scene === 4 && <DriftingParachutes zone="landing" />}
-        {(scene === 5 || scene === 6) && <DriftingParachutes zone="cta" />}
+        <BackgroundParachuteDrops enabled={scene === 0 && heroIntroDone} variant="hero" />
+        {scene === 4 && <BackgroundParachuteDrops enabled variant="landing" />}
         <div className="fall-altimeter tabular" aria-live="polite">
           <span className="fall-alt-label">ALT</span>
           <span className="fall-alt-value">${priceDisplay.toFixed(2)}</span>
@@ -308,6 +323,10 @@ function FallSvgLayer({
   trailPct,
   showTrailLabel,
   ratchetNotches,
+  scene,
+  sceneT,
+  showHeroIntro,
+  onHeroIntroDone,
 }: {
   W: number;
   H: number;
@@ -323,7 +342,20 @@ function FallSvgLayer({
   trailPct: number;
   showTrailLabel: boolean;
   ratchetNotches: number;
+  scene: number;
+  sceneT: number;
+  showHeroIntro?: boolean;
+  onHeroIntroDone?: () => void;
 }) {
+  const stableY = H * 0.8;
+  const touchdown = scene === 4;
+  const bounceY =
+    touchdown && sceneT > 0.38
+      ? 11 * Math.sin((sceneT - 0.38) * Math.PI * 2.4) * Math.exp(-(sceneT - 0.38) * 3.2)
+      : 0;
+  const collapseOpen =
+    touchdown && sceneT > 0.58 ? Math.max(0, canopyOpen * (1 - (sceneT - 0.58) * 2.4)) : canopyOpen;
+  const ripples = touchdown && sceneT > 0.42 && sceneT < 0.9;
   return (
     <>
       <defs>
@@ -417,11 +449,32 @@ function FallSvgLayer({
           )}
         </>
       )}
-      <Canopy x={capX} y={capY - 10} open={canopyOpen} />
-      <Capsule x={capX} y={capY} scale={1.15} />
+      {showHeroIntro && onHeroIntroDone && (
+        <HeroIntroDrop targetX={capX} targetY={capY} onComplete={onHeroIntroDone} />
+      )}
+      {!showHeroIntro && (
+        <>
+          <SpringCanopy x={capX} y={capY + bounceY - 10} open={collapseOpen} />
+          <Capsule x={capX} y={capY + bounceY} scale={1.15} />
+        </>
+      )}
       {groundGlow && (
         <>
-          <rect x="0" y={H * 0.8} width={W} height={H * 0.2} className="stable-ground" rx="0" />
+          <rect x="0" y={stableY} width={W} height={H * 0.2} className="stable-ground" rx="0" />
+          {ripples && (
+            <motion.ellipse
+              cx={capX}
+              cy={stableY + 2}
+              rx={8}
+              ry={3}
+              fill="none"
+              stroke="#14161C"
+              strokeOpacity={0.25}
+              initial={false}
+              animate={{ rx: [8, 54, 72], ry: [3, 8, 4], opacity: [0.45, 0.2, 0] }}
+              transition={{ duration: 0.85, ease: "easeOut" }}
+            />
+          )}
           <text x={W / 2} y={H * 0.94} textAnchor="middle" className="ground-mint" fontSize="13">
             stable
           </text>
