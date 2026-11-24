@@ -7,6 +7,7 @@ import { CreateStopFlow, type CreateStopDraft } from "./components/CreateStopFlo
 import { CrossChainTimeline } from "./components/CrossChainTimeline";
 import { StatsStrip } from "./components/StatsStrip";
 import { PackingDeck } from "./components/PackingDeck";
+import { NarrativeBridge } from "./components/NarrativeBridge";
 import { DEMO_POSITIONS, PROOF_PRICES, buildDemoTimeline } from "./data/demoSeed";
 import { useChainlinkPrices } from "./hooks/useChainlinkPrice";
 export default function App() {
@@ -64,6 +65,7 @@ export default function App() {
     <div className="parachute-page">
       <Header demoMode={demoMode} onToggleDemo={() => setDemoMode((d) => !d)} minimal />
       <FallNarrative ethSpot={ethSpot} demoMode={demoMode} onReachApp={onReachApp} />
+      <NarrativeBridge />
       <PackingDeck swapGround={swapGround}>
         <div className="page-container">
           <header className="pack-header">

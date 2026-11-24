@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { DriftingParachutes, HoverLandParachute } from "../components/DriftingParachutes";
 import { useMotionSafe } from "../lib/motion";
 import {
   buildAltitudePath,
@@ -50,10 +51,15 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
 
   const priceDisplay = useMemo(() => {
     const base = ethSpot;
+    if (progress < 1 / SCENES) return base;
     const drop = progress < 0.2 ? 0 : Math.min(1, (progress - 0.2) / 0.35);
     const recover = progress > 0.72 ? (progress - 0.72) / 0.28 : 0;
-    return base * (1 + 0.04 * (1 - progress)) * (1 - drop * 0.18) + recover * base * 0.03;
+    return base * (1 - drop * 0.18) + recover * base * 0.03;
   }, [ethSpot, progress]);
+
+  const [ctaHover, setCtaHover] = useState(false);
+  const [narrativeExited, setNarrativeExited] = useState(false);
+  const showScrollCta = scene === 6 && progress < 0.93 && !narrativeExited;
 
   const trailPct = 5;
   const ratchet = scene >= 2 ? Math.min(1, (scene - 2 + t * 0.85) / 1.8) : 0;
@@ -85,6 +91,13 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
       onUpdate: (self) => setProgress(self.progress),
     });
 
+    const exitSt = ScrollTrigger.create({
+      trigger: el,
+      start: "bottom bottom+=1",
+      onEnter: () => setNarrativeExited(true),
+      onLeaveBack: () => setNarrativeExited(false),
+    });
+
     const refresh = () => ScrollTrigger.refresh();
     refresh();
     requestAnimationFrame(refresh);
@@ -94,6 +107,7 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
     return () => {
       ro.disconnect();
       st.kill();
+      exitSt.kill();
     };
   }, [reduce]);
 
@@ -128,7 +142,7 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
     return (
       <section className="fall-fallback" aria-label="Story preview" data-scene={SCENE_NAMES[staticScene]}>
         <div className="fall-split">
-          <PhaseCopy scene={staticScene} ethSpot={ethSpot} demoMode={demoMode} savedDemo={savedDemo} price={priceDisplay} />
+          <PhaseCopy scene={staticScene} demoMode={demoMode} savedDemo={savedDemo} price={priceDisplay} />
           <div className="fall-visual-panel">
             <svg viewBox={`0 0 ${W} ${H}`} className="fall-svg">
               <FallSvgLayer
@@ -169,7 +183,10 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
       data-progress={progress.toFixed(3)}
       data-scene={SCENE_NAMES[scene]}
     >
-      <div className={`fall-pin ${skyScene ? "fall-sky" : ""}`}>
+      <div className={`fall-pin ${skyScene ? "fall-sky" : ""} ${narrativeExited ? "fall-pin-exited" : ""}`}>
+        <DriftingParachutes zone="hero" />
+        {skyScene && <DriftingParachutes zone="landing" />}
+        {scene >= 5 && <DriftingParachutes zone="cta" />}
         <div className="fall-grain" aria-hidden />
         <div className="fall-cloud-drift" aria-hidden />
         <div className="fall-altimeter tabular" aria-live="polite">
@@ -181,7 +198,7 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
         </div>
 
         <div className="fall-split">
-          <PhaseCopy scene={scene} ethSpot={ethSpot} demoMode={demoMode} savedDemo={savedDemo} price={priceDisplay} />
+          <PhaseCopy scene={scene} demoMode={demoMode} savedDemo={savedDemo} price={priceDisplay} />
           <div className="fall-visual-panel">
             <div className="fall-stage" style={{ transform: `rotate(${tilt}deg)` }}>
               <svg viewBox={`0 0 ${W} ${H}`} className="fall-svg" role="img" aria-label="Price path and capsule">
@@ -201,8 +218,18 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
         )}
         {scene === 5 && <HowItWorksRail progress={t} />}
         {groundGlow && <div className="fall-ground-glow" style={{ opacity: 0.35 + t * 0.35 }} aria-hidden />}
-        {scene === 6 && (
-          <button type="button" className="fall-capsule-cta" onClick={scrollToApp} aria-label="Create stop">
+        {showScrollCta && (
+          <button
+            type="button"
+            className="fall-capsule-cta"
+            onClick={scrollToApp}
+            onMouseEnter={() => setCtaHover(true)}
+            onMouseLeave={() => setCtaHover(false)}
+            onFocus={() => setCtaHover(true)}
+            onBlur={() => setCtaHover(false)}
+            aria-label="Create stop"
+          >
+            <HoverLandParachute active={ctaHover} />
             <svg viewBox="0 0 72 48" width="72" height="48" aria-hidden>
               <Capsule x={36} y={24} scale={1.2} />
             </svg>
@@ -217,13 +244,11 @@ export function FallNarrative({ ethSpot, demoMode, onReachApp }: Props) {
 function PhaseCopy({
   scene,
   price,
-  ethSpot,
   demoMode,
   savedDemo,
 }: {
   scene: number;
   price: number;
-  ethSpot: number;
   demoMode: boolean;
   savedDemo?: number;
 }) {
@@ -233,7 +258,7 @@ function PhaseCopy({
         <>
           <p className="fall-eyebrow">Reactive Omni · Set It and Forget It</p>
           <h1 className="fall-h1">
-            Automated stop-loss
+            Automated <span className="fall-nb">stop{"\u2011"}loss</span>
             <br />
             <span className="fall-accent">that actually lands</span>
           </h1>
@@ -242,7 +267,7 @@ function PhaseCopy({
             callbacks your vault before the dip becomes a crash.
           </p>
           <p className="fall-live tabular">
-            ETH/USD ${ethSpot.toFixed(2)} <span className="fall-alt-mode-inline">{demoMode ? "· demo" : "· live"}</span>
+            ETH/USD ${price.toFixed(2)} <span className="fall-alt-mode-inline">{demoMode ? "· demo" : "· live"}</span>
           </p>
         </>
       )}
@@ -303,9 +328,9 @@ function FallSvgLayer({
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <linearGradient id="priceStroke" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#14161C" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#14161C" />
+        <linearGradient id="priceFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#14161C" stopOpacity="0.1" />
+          <stop offset="100%" stopColor="#14161C" stopOpacity="0" />
         </linearGradient>
       </defs>
       <rect width={W} height={H} rx="8" fill="url(#skyGrad)" stroke="rgba(20,22,28,0.12)" />
@@ -329,8 +354,24 @@ function FallSvgLayer({
             opacity={0.2 + (i % 2) * 0.1}
           />
         ))}
-      <path d={fullPath} fill="none" stroke="rgba(20,22,28,0.12)" strokeWidth="1" stroke-dasharray="4 4" />
-      <path d={pathDrawn} fill="none" stroke="url(#priceStroke)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={fullPath} fill="none" stroke="rgba(20,22,28,0.1)" strokeWidth="1" stroke-dasharray="4 4" />
+      {(() => {
+        const m = pathDrawn.match(/^M([\d.]+),([\d.]+)/);
+        const sx = m ? Number(m[1]) : 12;
+        const floor = H - 10;
+        if (pathDrawn.length <= 8) return null;
+        return (
+          <path d={`${pathDrawn} L${capX.toFixed(1)},${floor} L${sx},${floor} Z`} fill="url(#priceFill)" />
+        );
+      })()}
+      <path
+        d={pathDrawn}
+        fill="none"
+        stroke="#5C6170"
+        strokeWidth="2.35"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       {tetherLen > 8 && (
         <>
           <line

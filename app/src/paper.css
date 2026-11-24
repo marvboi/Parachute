@@ -400,6 +400,99 @@ body,
   box-shadow: none !important;
 }
 
+/* Drifting parachutes */
+.drift-parachutes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 92px;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.drift-chute {
+  position: absolute;
+  top: 0;
+  will-change: transform;
+}
+
+.drift-hero {
+  z-index: 2;
+}
+
+.drift-landing,
+.drift-cta {
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+.narrative-bridge {
+  position: relative;
+  height: clamp(48px, 8vh, 88px);
+  margin-top: -8px;
+  overflow: hidden;
+  background: linear-gradient(180deg, transparent, var(--bg) 55%);
+}
+
+.narrative-bridge .drift-parachutes {
+  position: absolute;
+  inset: 0;
+}
+
+.fall-nb {
+  white-space: nowrap;
+}
+
+.fall-pin-exited {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.fall-pin-exited * {
+  animation-play-state: paused !important;
+}
+
+.fall-capsule-cta {
+  position: relative;
+}
+
+.hover-land-chute {
+  position: absolute;
+  left: -6px;
+  top: -38px;
+  pointer-events: none;
+}
+
+.fall-visual-panel {
+  align-self: stretch;
+}
+
+.fall-split {
+  align-items: stretch;
+}
+
+.fall-copy {
+  padding-bottom: 8px;
+}
+
+.fall-h1 {
+  margin-bottom: 0.35em;
+}
+
+.fall-lede {
+  margin-top: 0.85em;
+}
+
+.fall-live {
+  margin-top: 1.1em;
+}
+
+.pack-app.ground-stable {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--sky) 18%, var(--bg) 52%) !important;
+}
+
 @media (max-width: 720px) {
   .header-inner {
     flex-wrap: wrap;
@@ -426,13 +519,14 @@ body,
     position: relative !important;
     top: auto !important;
     right: auto !important;
-    margin: 88px auto 0;
+    margin: 108px auto 4px;
     text-align: center;
     width: min(100%, 280px);
+    z-index: 7;
   }
 
   .fall-split {
-    padding-top: 16px !important;
+    padding-top: 8px !important;
     width: calc(100% - 32px) !important;
   }
 

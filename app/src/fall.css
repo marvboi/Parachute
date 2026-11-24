@@ -97,7 +97,7 @@
 .fall-visual-panel {
   position: relative;
   width: 100%;
-  min-height: min(52vh, 440px);
+  min-height: min(58vh, 480px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,7 +117,7 @@
   max-width: 560px;
   height: auto;
   aspect-ratio: 520 / 420;
-  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 8px 24px rgba(20, 22, 28, 0.08));
   transform-origin: center center;
 }
 
@@ -405,10 +405,10 @@
   align-items: center;
   gap: 12px;
   padding: 14px 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 91, 31, 0.45);
-  background: linear-gradient(135deg, rgba(255, 91, 31, 0.25), rgba(18, 24, 41, 0.9));
-  color: #f2f4f8;
+  border-radius: 8px;
+  border: 1px solid #ff5b1f;
+  background: #ff5b1f;
+  color: #fff;
   font-family: "Space Grotesk", sans-serif;
   font-weight: 600;
   cursor: pointer;
@@ -417,8 +417,8 @@
 }
 
 .fall-capsule-cta:hover {
-  transform: translateX(-50%) scale(1.02);
-  box-shadow: 0 0 32px rgba(255, 91, 31, 0.35);
+  transform: translateX(-50%) scale(1.01);
+  box-shadow: 0 4px 20px rgba(255, 91, 31, 0.22);
 }
 
 .fall-fallback {
