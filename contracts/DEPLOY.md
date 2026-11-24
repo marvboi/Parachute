@@ -1,6 +1,6 @@
 # Parachute deploy (owner-operated, cast keystore)
 
-Scripts use **bare** `vm.startBroadcast()`. You sign with Foundry’s keystore (`--account test`), not a raw key in `.env`.
+Scripts use **bare** `vm.startBroadcast()`. You sign with Foundry’s keystore (`--account eg. test`), 
 
 ## Wallet & RPC (WSL)
 
