@@ -56,6 +56,16 @@ export function CrossChainTimeline({ steps, compact }: Props) {
                   {step.txHash.slice(0, 10)}…{step.txHash.slice(-8)}
                 </a>
               )}
+              {!step.txHash && step.contractAddress && (
+                <a
+                  className="tx-link tabular"
+                  href={`${EXPLORERS[step.explorer]}/address/${step.contractAddress}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {step.contractAddress.slice(0, 10)}…{step.contractAddress.slice(-8)}
+                </a>
+              )}
             </div>
           </motion.li>
         ))}

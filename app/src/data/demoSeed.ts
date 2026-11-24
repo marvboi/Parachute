@@ -9,7 +9,7 @@ export const PROOF_PRICES = {
 
 export type TokenSymbol = "ETH" | "BTC" | "LINK";
 
-export type PositionStatus = "armed" | "triggered" | "landed";
+export type PositionStatus = "idle" | "armed" | "triggered" | "landed";
 
 export interface Position {
   id: string;
@@ -22,6 +22,12 @@ export interface Position {
   status: PositionStatus;
   safeAddress: string;
   swapToStable: boolean;
+  vaultId?: number;
+  onChain?: boolean;
+  tokenAddress?: `0x${string}`;
+  feedAddress?: `0x${string}`;
+  safeFull?: `0x${string}`;
+  liveSpot?: number;
 }
 
 export interface TimelineStep {
@@ -31,6 +37,7 @@ export interface TimelineStep {
   chainId: number;
   status: "done" | "active" | "pending";
   txHash?: string;
+  contractAddress?: string;
   explorer: "baseSepolia" | "lasna";
   detail: string;
 }
@@ -85,6 +92,42 @@ export const DEMO_POSITIONS: Position[] = [
     swapToStable: true,
   },
 ];
+
+export function buildLiveTimeline(token: TokenSymbol, vaultPositionId?: number): TimelineStep[] {
+  const posLabel = vaultPositionId ? `position #${vaultPositionId}` : "position";
+  return [
+    {
+      id: "e1",
+      label: "AnswerUpdated",
+      chain: "Base Sepolia",
+      chainId: CHAIN_BASE_SEPOLIA,
+      status: "done",
+      explorer: "baseSepolia",
+      detail: `${token}/USD Chainlink feed · vault ${contracts.vault.slice(0, 10)}…`,
+      contractAddress: contracts.ethUsdFeed,
+    },
+    {
+      id: "e2",
+      label: "react()",
+      chain: "Lasna",
+      chainId: CHAIN_LASNA,
+      status: "done",
+      explorer: "lasna",
+      detail: `Reactive ${contracts.reactive.slice(0, 10)}… watching ${posLabel}`,
+      contractAddress: contracts.reactive,
+    },
+    {
+      id: "e3",
+      label: "executeStop → land",
+      chain: "Base Sepolia",
+      chainId: CHAIN_BASE_SEPOLIA,
+      status: "active",
+      explorer: "baseSepolia",
+      detail: `Vault callback when stop hits · safe payout`,
+      contractAddress: contracts.vault,
+    },
+  ];
+}
 
 export function buildDemoTimeline(token: TokenSymbol): TimelineStep[] {
   return [

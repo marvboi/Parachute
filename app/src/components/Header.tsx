@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ParachuteLogo } from "./ParachuteLogo";
+import { WalletConnect } from "./WalletConnect";
 import { useMotionSafe } from "../lib/motion";
 
 type Props = {
@@ -24,7 +25,10 @@ export function Header({ demoMode, onToggleDemo, minimal }: Props) {
           <a href="#create">Create stop</a>
           <a href="#timeline">Cross-chain</a>
         </nav>
-        <MotionToggle demoMode={demoMode} onToggleDemo={onToggleDemo} />
+        <div className="header-actions">
+          <WalletConnect />
+          <MotionToggle demoMode={demoMode} onToggleDemo={onToggleDemo} />
+        </div>
       </div>
     </motion.header>
   );

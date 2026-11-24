@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import type { Position } from "../data/demoSeed";
-import { PROOF_PRICES, buildPriceSeries, buildDemoTimeline } from "../data/demoSeed";
+import { PROOF_PRICES, buildPriceSeries, buildDemoTimeline, buildLiveTimeline } from "../data/demoSeed";
+import { contracts, explorerAddress } from "../config/contracts";
 import { useMotionSafe } from "../lib/motion";
 import { CrossChainTimeline } from "./CrossChainTimeline";
 import { TokenIcon } from "./TokenIcon";
@@ -10,6 +11,7 @@ type Props = {
   positions: Position[];
   onSelect: (id: string) => void;
   selectedId: string;
+  liveSource?: boolean;
 };
 
 function miniLinePath(token: Position["token"]): string {
@@ -29,7 +31,7 @@ function miniLinePath(token: Position["token"]): string {
 }
 
 function triggerDistance(position: Position): number {
-  const spot = PROOF_PRICES[position.token];
+  const spot = position.liveSpot ?? PROOF_PRICES[position.token];
   const dist = spot - position.stopLevel;
   const range = position.highWater - position.stopLevel;
   return Math.min(100, Math.max(8, 100 - (dist / range) * 100));
@@ -37,13 +39,24 @@ function triggerDistance(position: Position): number {
 
 const intensity = (d: number) => `rgba(255, 91, 31, ${0.25 + (d / 100) * 0.65})`;
 
-export function PositionCards({ positions, onSelect, selectedId }: Props) {
+export function PositionCards({ positions, onSelect, selectedId, liveSource }: Props) {
   return (
     <section id="positions" className="panel panel-app positions-panel">
       <header className="panel-head">
         <div>
           <h2>Protected positions</h2>
           <p className="muted">Multi-token vault · fixed or trailing stops</p>
+          {liveSource && (
+            <p className="onchain-links muted">
+              <a href={explorerAddress("baseSepolia", contracts.vault)} target="_blank" rel="noreferrer">
+                Vault
+              </a>
+              {" · "}
+              <a href={explorerAddress("lasna", contracts.reactive)} target="_blank" rel="noreferrer">
+                Reactive
+              </a>
+            </p>
+          )}
         </div>
       </header>
       <div className="capsule-positions">
@@ -74,9 +87,9 @@ function CapsulePositionCard({
 }) {
   const { tween, stagger, reduce } = useMotionSafe();
   const dist = triggerDistance(position);
-  const spot = PROOF_PRICES[position.token];
+  const spot = position.liveSpot ?? PROOF_PRICES[position.token];
   const line = miniLinePath(position.token);
-  const showTimeline = position.status === "triggered";
+  const showTimeline = position.status === "triggered" || (position.onChain && position.status === "armed");
 
   return (
     <motion.article
@@ -141,7 +154,14 @@ function CapsulePositionCard({
       </p>
       {showTimeline && (
         <div className="pos-trigger-timeline">
-          <CrossChainTimeline steps={buildDemoTimeline(position.token)} compact />
+          <CrossChainTimeline
+            steps={
+              position.onChain
+                ? buildLiveTimeline(position.token, position.vaultId)
+                : buildDemoTimeline(position.token)
+            }
+            compact
+          />
         </div>
       )}
     </motion.article>
@@ -149,6 +169,13 @@ function CapsulePositionCard({
 }
 
 function StatusChip({ status }: { status: Position["status"] }) {
-  const label = status === "armed" ? "Armed" : status === "triggered" ? "Triggered" : "Landed";
+  const label =
+    status === "armed"
+      ? "Armed"
+      : status === "triggered"
+        ? "Triggered"
+        : status === "idle"
+          ? "Idle"
+          : "Landed";
   return <span className={`status-chip glow-mint ${status}`}>{label}</span>;
 }
