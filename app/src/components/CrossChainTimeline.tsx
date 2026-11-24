@@ -3,13 +3,13 @@ import { EXPLORERS } from "../config/contracts";
 import type { TimelineStep } from "../data/demoSeed";
 import { useMotionSafe } from "../lib/motion";
 
-type Props = { steps: TimelineStep[] };
+type Props = { steps: TimelineStep[]; compact?: boolean };
 
-export function CrossChainTimeline({ steps }: Props) {
+export function CrossChainTimeline({ steps, compact }: Props) {
   const { tween, stagger, reduce } = useMotionSafe();
 
   return (
-    <section id="timeline" className="panel glass timeline-panel">
+    <section id="timeline" className={`panel panel-app timeline-panel ${compact ? "timeline-compact" : ""}`}>
       <header className="panel-head">
         <div>
           <h2>Cross-chain timeline</h2>

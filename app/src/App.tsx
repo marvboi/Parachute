@@ -1,22 +1,27 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { FallNarrative } from "./fall/FallNarrative";
 import { Header } from "./components/Header";
-import { Hero } from "./components/Hero";
 import { LivePriceChart } from "./components/LivePriceChart";
 import { PositionCards } from "./components/PositionCards";
 import { CreateStopFlow, type CreateStopDraft } from "./components/CreateStopFlow";
 import { CrossChainTimeline } from "./components/CrossChainTimeline";
 import { StatsStrip } from "./components/StatsStrip";
+import { PackingDeck } from "./components/PackingDeck";
 import { DEMO_POSITIONS, PROOF_PRICES, buildDemoTimeline } from "./data/demoSeed";
 import { useChainlinkPrices } from "./hooks/useChainlinkPrice";
-import { hasDeployments } from "./config/contracts";
-
 export default function App() {
   const [demoMode, setDemoMode] = useState(true);
   const [positions, setPositions] = useState(DEMO_POSITIONS);
   const [selectedId, setSelectedId] = useState(DEMO_POSITIONS[0].id);
+  const [swapGround, setSwapGround] = useState(true);
 
   const selected = positions.find((p) => p.id === selectedId) ?? positions[0];
   const live = useChainlinkPrices(["ETH", "BTC", "LINK"], !demoMode);
+
+  const ethSpot = useMemo(() => {
+    if (!demoMode && live.data?.ETH) return live.data.ETH.price;
+    return PROOF_PRICES.ETH;
+  }, [demoMode, live.data]);
 
   const spot = useMemo(() => {
     if (!demoMode && live.data?.[selected.token]) {
@@ -51,30 +56,33 @@ export default function App() {
     setSelectedId(id);
   };
 
+  const onReachApp = useCallback(() => {
+    /* optional: analytics hook */
+  }, []);
+
   return (
-    <div className="app-shell">
-      <Header demoMode={demoMode} onToggleDemo={() => setDemoMode((d) => !d)} />
-      <main>
-        <Hero activeToken={selected.token} spot={spot} reactiveReady={hasDeployments() || demoMode} />
+    <div className="parachute-page">
+      <Header demoMode={demoMode} onToggleDemo={() => setDemoMode((d) => !d)} minimal />
+      <FallNarrative ethSpot={ethSpot} onReachApp={onReachApp} />
+      <PackingDeck swapGround={swapGround}>
         <StatsStrip positions={positions} demoMode={demoMode} />
-        <div className="layout-12">
-          <div className="col-chart">
-            <LivePriceChart
-              token={selected.token}
-              basePrice={spot}
-              trailPct={selected.stopType === "trailing" ? selected.trailPct : 5}
-              animated={demoMode}
-            />
-          </div>
-          <aside className="col-side">
-            <PositionCards positions={positions} selectedId={selectedId} onSelect={setSelectedId} />
-            <CreateStopFlow demoMode={demoMode} onSubmit={onCreate} />
-          </aside>
-          <div className="col-full">
-            <CrossChainTimeline steps={timeline} />
-          </div>
+        <div className="app-deck-grid">
+          <LivePriceChart
+            token={selected.token}
+            basePrice={spot}
+            trailPct={selected.stopType === "trailing" ? selected.trailPct : 5}
+            animated={demoMode}
+          />
+          <PositionCards positions={positions} selectedId={selectedId} onSelect={setSelectedId} />
+          <CreateStopFlow
+            demoMode={demoMode}
+            onSubmit={onCreate}
+            onLandingMode={setSwapGround}
+            armedCount={positions.filter((p) => p.status === "armed").length}
+          />
+          <CrossChainTimeline steps={timeline} />
         </div>
-      </main>
+      </PackingDeck>
       <footer className="site-footer">
         <p>Parachute · Reactive buildathon — public data only · Base Sepolia Chainlink + Lasna reactive</p>
       </footer>

@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import type { Position } from "../data/demoSeed";
-import { PROOF_PRICES, buildPriceSeries } from "../data/demoSeed";
+import { PROOF_PRICES, buildPriceSeries, buildDemoTimeline } from "../data/demoSeed";
 import { useMotionSafe } from "../lib/motion";
+import { CrossChainTimeline } from "./CrossChainTimeline";
 import { TokenIcon } from "./TokenIcon";
+import { Capsule } from "../fall/svg/Capsule";
 
 type Props = {
   positions: Position[];
@@ -10,11 +12,11 @@ type Props = {
   selectedId: string;
 };
 
-function sparklinePoints(position: Position): string {
-  const base = PROOF_PRICES[position.token] * (0.98 + position.amount * 0.001);
-  const pts = buildPriceSeries(base, 24);
-  const w = 80;
-  const h = 22;
+function miniLinePath(token: Position["token"]): string {
+  const base = PROOF_PRICES[token];
+  const pts = buildPriceSeries(base, 20);
+  const w = 140;
+  const h = 56;
   const max = Math.max(...pts);
   const min = Math.min(...pts);
   return pts
@@ -26,27 +28,27 @@ function sparklinePoints(position: Position): string {
     .join(" ");
 }
 
-function progressToStop(position: Position): number {
+function triggerDistance(position: Position): number {
   const spot = PROOF_PRICES[position.token];
-  if (position.status === "landed" || position.status === "triggered") return 100;
+  const dist = spot - position.stopLevel;
   const range = position.highWater - position.stopLevel;
-  if (range <= 0) return 0;
-  const traveled = position.highWater - spot;
-  return Math.min(100, Math.max(4, (traveled / range) * 100));
+  return Math.min(100, Math.max(8, 100 - (dist / range) * 100));
 }
+
+const intensity = (d: number) => `rgba(255, 91, 31, ${0.25 + (d / 100) * 0.65})`;
 
 export function PositionCards({ positions, onSelect, selectedId }: Props) {
   return (
-    <section id="positions" className="panel glass positions-panel">
+    <section id="positions" className="panel panel-app positions-panel">
       <header className="panel-head">
         <div>
           <h2>Protected positions</h2>
           <p className="muted">Multi-token vault · fixed or trailing stops</p>
         </div>
       </header>
-      <div className="card-grid rich">
+      <div className="capsule-positions">
         {positions.map((p, i) => (
-          <PositionCard
+          <CapsulePositionCard
             key={p.id}
             position={p}
             active={p.id === selectedId}
@@ -59,7 +61,7 @@ export function PositionCards({ positions, onSelect, selectedId }: Props) {
   );
 }
 
-function PositionCard({
+function CapsulePositionCard({
   position,
   active,
   index,
@@ -71,77 +73,82 @@ function PositionCard({
   onSelect: () => void;
 }) {
   const { tween, stagger, reduce } = useMotionSafe();
-  const progress = progressToStop(position);
+  const dist = triggerDistance(position);
+  const spot = PROOF_PRICES[position.token];
+  const line = miniLinePath(position.token);
+  const showTimeline = position.status === "triggered";
 
   return (
     <motion.article
-      className={`position-card rich ${active ? "active" : ""} status-${position.status}`}
+      className={`capsule-position ${active ? "active" : ""} state-${position.status}`}
       role="button"
       tabIndex={0}
       onClick={onSelect}
       onKeyDown={(e) => e.key === "Enter" && onSelect()}
-      layout
-      initial={reduce ? false : { opacity: 0, y: 14 }}
+      initial={reduce ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...tween, delay: index * stagger }}
-      whileHover={reduce ? {} : { y: -3 }}
     >
-      <div className="card-top">
-        <span className="token-row">
-          <TokenIcon symbol={position.token} size={28} />
-          <span className="token-badge">{position.token}</span>
-        </span>
+      <div className="capsule-pos-head">
+        <TokenIcon symbol={position.token} size={22} />
         <StatusChip status={position.status} />
       </div>
-      <p className="amount tabular">
+      <div className="capsule-pos-svg">
+        <svg viewBox="0 0 140 56" className="capsule-line-svg">
+          <path d={line} fill="none" stroke="#FF5B1F" strokeWidth="1.2" opacity="0.85" />
+          <line
+            x1="0"
+            y1={40}
+            x2="140"
+            y2={40}
+            stroke="#FF5B1F"
+            strokeDasharray="3 3"
+            opacity="0.45"
+          />
+          <g transform="translate(110, 22)">
+            <Capsule x={0} y={0} scale={0.85} tokenGlyph={position.token.slice(0, 1)} />
+          </g>
+          {position.status === "triggered" && (
+            <path d="M100 10 Q115 0 130 10" fill="rgba(255,91,31,0.5)" stroke="#FF5B1F" strokeWidth="0.8" />
+          )}
+        </svg>
+      </div>
+      <p className="tabular pos-amount">
         {position.amount} {position.token}
       </p>
-      <svg viewBox="0 0 80 22" className="sparkline" aria-hidden>
-        <defs>
-          <linearGradient id={`sp-${position.id}`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#FF5B1F" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#FF5B1F" />
-          </linearGradient>
-        </defs>
-        <path d={sparklinePoints(position)} fill="none" stroke={`url(#sp-${position.id})`} strokeWidth="1.4" />
-      </svg>
-      <div className="progress-stop">
-        <div className="progress-label">
-          <span>Progress to stop</span>
-          <span className="tabular">{progress.toFixed(0)}%</span>
-        </div>
-        <div className="progress-track">
-          <motion.div
-            className="progress-fill"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={tween}
-          />
-        </div>
-      </div>
-      <dl className="card-meta">
+      <dl className="capsule-metrics tabular">
+        <span>
+          <dt>Price</dt>
+          <dd className="live-value">${spot.toFixed(2)}</dd>
+        </span>
+        <span>
+          <dt>Peak</dt>
+          <dd>${position.highWater.toLocaleString()}</dd>
+        </span>
         <span>
           <dt>Stop</dt>
-          <dd>{position.stopType === "fixed" ? "Fixed" : `Trailing ${position.trailPct}%`}</dd>
-        </span>
-        <span>
-          <dt>High</dt>
-          <dd className="tabular">${position.highWater.toLocaleString()}</dd>
-        </span>
-        <span>
-          <dt>Level</dt>
-          <dd className="tabular accent">${position.stopLevel.toLocaleString()}</dd>
+          <dd>${position.stopLevel.toLocaleString()}</dd>
         </span>
       </dl>
-      <footer className="card-foot">
-        <span className="tabular safe">{position.safeAddress}</span>
-        {position.swapToStable && <span className="chip glass-pill">Swap → stable</span>}
-      </footer>
+      <div className="trigger-distance">
+        <span>Trigger distance</span>
+        <div className="trigger-track">
+          <div className="trigger-fill" style={{ width: `${dist}%`, background: intensity(dist) }} />
+        </div>
+      </div>
+      <p className="pos-stop-type">
+        {position.stopType === "fixed" ? "Fixed" : `Trailing ${position.trailPct}%`}
+      </p>
+      {showTimeline && (
+        <div className="pos-trigger-timeline">
+          <CrossChainTimeline steps={buildDemoTimeline(position.token)} compact />
+        </div>
+      )}
     </motion.article>
   );
 }
 
 function StatusChip({ status }: { status: Position["status"] }) {
   const label = status === "armed" ? "Armed" : status === "triggered" ? "Triggered" : "Landed";
-  return <span className={`status-chip glow ${status}`}>{label}</span>;
+  return <span className={`status-chip glow-mint ${status}`}>{label}</span>;
 }

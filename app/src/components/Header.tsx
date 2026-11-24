@@ -5,14 +5,15 @@ import { useMotionSafe } from "../lib/motion";
 type Props = {
   demoMode: boolean;
   onToggleDemo: () => void;
+  minimal?: boolean;
 };
 
-export function Header({ demoMode, onToggleDemo }: Props) {
+export function Header({ demoMode, onToggleDemo, minimal }: Props) {
   const { reduce } = useMotionSafe();
 
   return (
     <motion.header
-      className="site-header glass header-bar"
+      className={`site-header glass header-bar ${minimal ? "header-minimal" : ""}`}
       initial={reduce ? false : { opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
     >

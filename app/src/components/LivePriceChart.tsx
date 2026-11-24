@@ -73,7 +73,7 @@ export function LivePriceChart({ token, basePrice, trailPct, animated }: Props) 
   })();
 
   return (
-    <section className="panel glass chart-panel chart-hero" aria-label="Live trailing stop chart">
+    <section className="panel panel-app chart-panel chart-hero" aria-label="Live trailing stop chart">
       <header className="panel-head chart-head">
         <div>
           <h2>Live chart</h2>
