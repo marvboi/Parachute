@@ -1,0 +1,26 @@
+# Foundry
+cache/
+out/
+broadcast/
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+keystore/
+credentials.json
+
+# Dependencies & build junk
+node_modules/
+dist/
+
+# Editor/OS
+.DS_Store
+.idea/
+.vscode/
+*.local*.tsbuildinfo
